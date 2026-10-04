@@ -1,4 +1,103 @@
 export const extra = {
+  voiceTakingTooLong: [
+    "La réponse prend trop de temps. Réessayez.",
+    "The response is taking too long. Try again.",
+    "Jibu linachukua muda mrefu. Jaribu tena.",
+    "Eyano eumeli mingi. Meká lisusu.",
+  ],
+  voiceListening: [
+    "Je vous écoute…",
+    "Listening…",
+    "Ninakusikiliza…",
+    "Nazali koyoka yo…",
+  ],
+  voiceNoSound: [
+    "Aucun son capté. Parlez près du téléphone puis réessayez.",
+    "No sound captured. Speak near your phone and try again.",
+    "Sauti haijasikika. Sema karibu na simu na ujaribu tena.",
+    "Mongongo eyokani te. Loba pene na telefone mpe meká lisusu.",
+  ],
+  voiceRecordFailed: [
+    "Le son n’a pas été enregistré. Réessayez.",
+    "Audio was not recorded. Try again.",
+    "Sauti haikurekodiwa. Jaribu tena.",
+    "Mongongo ekomami te. Meká lisusu.",
+  ],
+  voiceServiceUnavailable: [
+    "La recherche vocale est indisponible pour le moment. Écrivez le lieu.",
+    "Voice search is currently unavailable. Type the place.",
+    "Utafutaji wa sauti haupatikani sasa. Andika mahali.",
+    "Koluka na mongongo ezali te sikoyo. Komá esika.",
+  ],
+  voiceNetwork: [
+    "Connexion interrompue. Réessayez.",
+    "Connection interrupted. Try again.",
+    "Mtandao umekatika. Jaribu tena.",
+    "Connexion ekatani. Meká lisusu.",
+  ],
+  voiceSessionExpired: [
+    "Reconnectez-vous pour utiliser le micro.",
+    "Sign in again to use the microphone.",
+    "Ingia tena kutumia maikrofoni.",
+    "Kota lisusu mpo na kosalela micro.",
+  ],
+  autoSearchPrivacy: [
+    "Recherche automatique · aide OpenAI si nécessaire.",
+    "Automatic search · OpenAI assistance when needed.",
+    "Utafutaji wa moja kwa moja · msaada wa OpenAI ikihitajika.",
+    "Boluki yango moko · lisalisi ya OpenAI soki esengeli.",
+  ],
+  placeResults: ["RÉSULTATS", "RESULTS", "MATOKEO", "BIYANO"],
+  placeLandmarks: [
+    "LIEUX ET RÉFÉRENCES",
+    "PLACES AND LANDMARKS",
+    "MAHALI NA ALAMA",
+    "BISIKA MPE BILEMBO",
+  ],
+  voiceFinish: ["Terminé", "Done", "Nimemaliza", "Nasili"],
+  voiceTranscribing: [
+    "Un instant…",
+    "One moment…",
+    "Subiri kidogo…",
+    "Zela moke…",
+  ],
+  voicePreparing: [
+    "Ouverture du micro…",
+    "Opening microphone…",
+    "Kufungua maikrofoni…",
+    "Kofungola micro…",
+  ],
+  voiceSayDestination: [
+    "Dites où vous allez. Arrêt après une pause ou avec Terminé.",
+    "Say where you are going. Pause to finish, or tap Done.",
+    "Sema unapoenda. Nyamaza au bonyeza Nimemaliza.",
+    "Loba esika ozali kokende. Fanda kimya to finá Nasili.",
+  ],
+  voiceCloudNotice: [
+    "Votre voix est envoyée à OpenAI pour écrire votre demande.",
+    "Your voice is sent to OpenAI to write your request.",
+    "Sauti yako inatumwa kwa OpenAI kuandika ombi lako.",
+    "Mongongo na yo ekotindama na OpenAI mpo na kokoma bosenga na yo.",
+  ],
+  voiceConnectedOnly: [
+    "Connectez-vous pour parler, ou écrivez votre destination.",
+    "Sign in to speak, or type your destination.",
+    "Ingia ili kuzungumza, au andika unapoenda.",
+    "Kota na konti mpo na koloba, to koma esika ozali kokende.",
+  ],
+  voiceQuota: [
+    "Le micro est momentanément indisponible. Écrivez votre destination.",
+    "Voice is temporarily unavailable. Type your destination.",
+    "Sauti haipatikani sasa. Andika unapoenda.",
+    "Micro ezali kosala te sikoyo. Koma esika ozali kokende.",
+  ],
+  voiceRetry: [
+    "Je n’ai pas pu comprendre. Réessayez ou écrivez le lieu.",
+    "I could not understand. Try again or type the place.",
+    "Sikuelewa. Jaribu tena au andika mahali.",
+    "Nasosoli te. Meka lisusu to koma esika.",
+  ],
+
   smartSearchAction: [
     "Comprendre ma demande",
     "Understand my request",

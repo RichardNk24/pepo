@@ -10,22 +10,11 @@ export type Resolution = {
   source: "local" | "openai" | "cache" | "fallback";
   status: "suggestions" | "no_match" | "unavailable";
 };
-const norm = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-const stop = new Set(
-  "je veux aller au a la le les de du des l en vers chez amene moi emmene cote entree please take me to the at entrance side go natika nakende na ya kwenda nipeleke kwenye upande mlango svp".split(
-    " ",
-  ),
-);
-const tokens = (s: string) =>
-  norm(s)
-    .split(" ")
-    .filter((w) => w.length > 1 && !stop.has(w));
+import {
+  destinationWords as tokens,
+  normalizePlaceName as norm,
+} from "./query";
+import { mergePlaceResults } from "./results";
 export function localChoices(
   query: string,
   catalog: CatalogPlace[],
@@ -38,9 +27,30 @@ export function localChoices(
         ...names.map((n) => {
           const ns = tokens(n);
           const hits = words.filter((w) => ns.includes(w)).length;
+          const prefixes = words.filter(
+            (w) =>
+              w.length >= 3 &&
+              !ns.includes(w) &&
+              ns.some((n) => n.startsWith(w)),
+          ).length;
           // Complete place names survive conversational wrappers; partial names stay suggestions.
           return (
-            hits + (words.length && ns.every((w) => words.includes(w)) ? 5 : 0)
+            hits +
+            prefixes * 0.25 +
+            (words.length &&
+            ns.length &&
+            ns.every((w) => words.includes(w)) &&
+            words.every((w) =>
+              tokens(
+                [
+                  p.name,
+                  ...(p.aliases || []),
+                  ...(p.entrances || []).map((e) => e.name),
+                ].join(" "),
+              ).includes(w),
+            )
+              ? 5
+              : 0)
           );
         }),
       );
@@ -73,7 +83,7 @@ export function createPlaceIntelligence(options: {
   apiKey?: string;
   model?: string;
   dailyLimit?: number;
-  consume?: () => boolean;
+  consume?: (actor?: string) => boolean;
   fetcher?: typeof fetch;
   now?: () => number;
 }) {
@@ -96,8 +106,11 @@ export function createPlaceIntelligence(options: {
     city: CityId,
     language = "fr",
     allowAi = false,
+    actor?: string,
   ): Promise<Resolution> {
     query = query.trim().slice(0, 300);
+    if (!tokens(query).length)
+      return { places: [], source: "fallback", status: "no_match" };
     const catalog = (await options.catalog(city))
       .filter(
         (p) =>
@@ -118,11 +131,52 @@ export function createPlaceIntelligence(options: {
         ),
       }));
     const local = localChoices(query, catalog);
-    if (local.places.length)
-      return { places: local.places, source: "local", status: "suggestions" };
     const candidates = local.candidates;
+    // A catalogue hit must not hide establishments missing from that catalogue.
+    // Search once, reuse the result for every subsequent fallback (no paid retry).
+    let discovered: Place[] = [];
+    let unavailable = false;
+    metrics.fallbacks++;
+    try {
+      discovered = (await options.fallback(query, city)).filter(
+        (p) =>
+          p.city === city &&
+          Number.isFinite(p.latitude) &&
+          Number.isFinite(p.longitude) &&
+          haversine(p, CITIES[city].center) <= 60,
+      );
+    } catch {
+      unavailable = true;
+    }
+    const google = discovered.filter((p) => p.googleAttribution);
+    // Keep declared entrance choices selectable ahead of their parent.
+    const entranceIds = new Set(
+      catalog.flatMap((p) => (p.entrances || []).map((e) => e.id)),
+    );
+    const requestedEntrances = local.places.filter((p) =>
+      entranceIds.has(p.id),
+    );
+    if (google.length)
+      return {
+        places: mergePlaceResults(
+          requestedEntrances,
+          google,
+          local.places,
+          discovered,
+          candidates,
+        ),
+        source: "fallback",
+        status: "suggestions",
+      };
+    if (local.places.length)
+      return {
+        places: mergePlaceResults(local.places, discovered, candidates),
+        source: "local",
+        status: "suggestions",
+      };
     // No grounding means no paid call. Google/classic search remains the fallback.
     if (
+      discovered.some((p) => !candidates.some((c) => c.id === p.id)) ||
       !allowAi ||
       !options.apiKey ||
       !candidates.length ||
@@ -175,7 +229,7 @@ export function createPlaceIntelligence(options: {
     if (
       active >= 2 ||
       calls >= Math.max(0, Math.min(1000, options.dailyLimit ?? 100)) ||
-      (options.consume && !options.consume())
+      (options.consume && !options.consume(actor))
     )
       return fallback();
     const task = (async () => {
@@ -254,30 +308,26 @@ export function createPlaceIntelligence(options: {
               ? (p as CatalogPlace).entrances!
               : [p],
           )
-          .slice(0, 8),
+          .concat(discovered, candidates)
+          .filter(
+            (p, index, all) => all.findIndex((v) => v.id === p.id) === index,
+          )
+          .slice(0, 20),
         source,
         status: "suggestions",
       };
     }
     async function fallback(): Promise<Resolution> {
-      metrics.fallbacks++;
-      try {
-        const found = candidates.length
-          ? []
-          : await options.fallback(query.slice(0, 100), city);
-        const places = (candidates.length ? candidates : found).slice(0, 8);
-        return {
-          places,
-          source: "fallback",
-          status: places.length ? "suggestions" : "no_match",
-        };
-      } catch {
-        return {
-          places: candidates.slice(0, 8),
-          source: "fallback",
-          status: candidates.length ? "suggestions" : "unavailable",
-        };
-      }
+      const places = mergePlaceResults(discovered, candidates);
+      return {
+        places,
+        source: "fallback",
+        status: places.length
+          ? "suggestions"
+          : unavailable
+            ? "unavailable"
+            : "no_match",
+      };
     }
   }
   return { resolve, metrics: () => ({ ...metrics }) };

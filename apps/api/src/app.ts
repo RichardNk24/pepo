@@ -24,6 +24,7 @@ import { register_admin } from "./admin/routes";
 import { register_auth } from "./auth/routes";
 import { register_documents } from "./documents/routes";
 import { register_drivers } from "./drivers/routes";
+import { register_voice } from "./voice/routes";
 import { register_map_search } from "./map-search/routes";
 import { register_maps } from "./maps/routes";
 import { ApiError, createRuntime, type ServerConfig } from "./runtime";
@@ -77,6 +78,7 @@ export function createApp(store: Store, config: ServerConfig) {
   register_documents(ctx);
   register_drivers(ctx);
   register_map_search(ctx);
+  register_voice(ctx);
   register_trips(ctx);
   register_support(ctx);
   app.use("/api", (_req, res) =>

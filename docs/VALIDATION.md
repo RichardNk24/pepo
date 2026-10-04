@@ -79,3 +79,10 @@ Le micro nécessite une build native incluant `expo-speech-recognition`, et ne f
 Avant un pilote réel, vérifier sur iPhone et Android : permissions, GPS, clavier, haptique du picker, panneau Vehicle Options, interruptions réseau, son, changement/persistance de langue, refus du micro et parcours Rider → Driver sur la même API. Faire relire le Lingala et le swahili congolais par des locuteurs. Vérifier les clés et restrictions Google, le fournisseur SMS et la revue des documents avec la configuration réelle.
 
 Les paiements Mobile Money, cartes, commissions et retraits restent à connecter à des fournisseurs. Les gains affichés sont des montants bruts de courses. Pour une montée en charge, mesurer d'abord le pilote et prévoir un stockage et une coordination adaptés aux multiples instances ; aucun benchmark de production n'est revendiqué.
+
+
+## Correctif du 4 octobre — recherche automatique et dictée Rider
+
+La recherche de destination Rider utilise désormais une pause de saisie de 700 ms. Le bouton « Comprendre ma demande » n'est plus nécessaire. La dictée de destination native passe par expo-audio et le backend OpenAI, y compris dans Expo Go ; la restriction Expo Go mentionnée plus haut reste celle de l'ancien microphone de commandes, encore utilisé ailleurs.
+
+Voir `RECHERCHE-AUTOMATIQUE-ET-VOIX.md` pour les paramètres, quotas et limites. TypeScript, lint, exports web/iOS Rider et build API vérifiés. Parcours navigateur connecté vérifié : phrase saisie → suggestion automatique → confirmation → destination de réservation, sans bouton de compréhension ni appel OpenAI payant. Le test utilise un catalogue fictif ; le micro matériel et le vrai fournisseur restent à valider sur téléphone.

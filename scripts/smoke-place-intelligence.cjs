@@ -94,11 +94,14 @@ const { openDatabase } = require("../apps/api/src/database.ts");
       .getByRole("textbox", { name: "Destination", exact: true })
       .fill("Amène-moi au mall, entrée parking");
     await page
-      .getByRole("button", { name: "Comprendre ma demande", exact: true })
-      .click();
-    await page
       .getByText("Complexe Test — Entrée parking", { exact: true })
       .waitFor();
+    if (
+      await page
+        .getByRole("button", { name: "Comprendre ma demande", exact: true })
+        .count()
+    )
+      throw new Error("Old action button remains");
     await page
       .getByText("Vérifiez le lieu et l’entrée avant de choisir.", {
         exact: true,
@@ -121,7 +124,7 @@ const { openDatabase } = require("../apps/api/src/database.ts");
       throw new Error("Chosen entrance was not passed to booking");
     if (errors.length) throw new Error(errors.join("\n"));
     console.log(
-      "Signed-in Rider: explicit resolve, declared parking entrance, confirmation and booking passed. No paid OpenAI call.",
+      "Signed-in Rider: automatic resolve, declared parking entrance, confirmation and booking passed. No paid OpenAI call.",
     );
   } finally {
     await browser?.close();

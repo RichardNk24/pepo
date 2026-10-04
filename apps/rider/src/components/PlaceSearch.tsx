@@ -11,9 +11,8 @@ import {
   type ReferencedPlace,
 } from "@pepo/utils/placeReferences";
 import { haversine } from "@pepo/utils/rules";
-import { VoiceButton } from "@pepo/voice/VoiceButton";
-import { parseVoice } from "@pepo/voice/commands";
-import { useRouter } from "expo-router";
+import type { CapturePhase } from "./voiceCapture";
+import { DestinationVoiceButton } from "./DestinationVoiceButton";
 import {
   ArrowUpRight,
   MapPin,
@@ -59,19 +58,24 @@ export function PlaceSearch({
   onDestinationSelect?: (p: Place) => void;
 }) {
   const app = useApp(),
-    location = useLocation(),
-    router = useRouter();
+    location = useLocation();
   const routeMode = !!routePickup && !!onPickupSelect && !!onDestinationSelect;
   const [active, setActive] = useState<Target>(
     pickup ? "pickup" : "destination",
   );
   const [mapPicking, setMapPicking] = useState(false);
   const [query, setQuery] = useState("");
+  const [voiceBusy, setVoiceBusy] = useState(false);
+  const [voiceFeedback, setVoiceFeedback] = useState({
+    phase: "idle" as CapturePhase,
+    level: 0,
+    seconds: 0,
+    message: "",
+  });
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false),
     [error, setError] = useState("");
   const requestVersion = useRef(0);
-  const [resolving, setResolving] = useState(false);
   const [resolveNotice, setResolveNotice] = useState("");
   const pickupInput = useRef<TextInput>(null),
     destinationInput = useRef<TextInput>(null);
@@ -83,6 +87,7 @@ export function PlaceSearch({
     : initialPlace;
   useEffect(() => {
     if (visible) {
+      setVoiceFeedback({ phase: "idle", level: 0, seconds: 0, message: "" });
       setMapPicking(false);
       setActive(pickup ? "pickup" : "destination");
       setQuery("");
@@ -103,77 +108,79 @@ export function PlaceSearch({
   useEffect(() => {
     const version = ++requestVersion.current;
     setResolveNotice("");
-    setResolving(false);
-    if (!visible || mapPicking) return;
+    setLoading(false);
+    if (!visible || mapPicking || voiceBusy) return;
     let disposed = false;
-    const timer = setTimeout(async () => {
-      if (version !== requestVersion.current) return;
-      setLoading(true);
-      setError("");
-      try {
-        let result: Place[];
-        if (query.trim().length < 2) {
-          const known = PLACES.filter((p) => p.city === app.settings.city);
-          const fix = location.fix;
-          if (fix && haversine(fix, CITIES[app.settings.city].center) <= 60) {
-            const nearby = (await reverseMapPlace(fix, app.settings.city).catch(
-              () => null,
-            )) as ReferencedPlace | null;
-            const seen = new Set<string>();
-            result = [
-              ...(nearby?.references || []),
-              ...known.sort((a, b) => haversine(fix, a) - haversine(fix, b)),
-            ].filter((p) => {
-              if (seen.has(p.id)) return false;
-              seen.add(p.id);
-              return true;
-            });
-          } else result = known;
-        } else result = await app.search(query.trim());
-        if (!disposed && version === requestVersion.current) setPlaces(result);
-      } catch (e) {
-        if (!disposed && version === requestVersion.current)
-          setError((e as Error).message);
-      } finally {
-        if (!disposed && version === requestVersion.current) setLoading(false);
-      }
-    }, 300);
+    const controller = new AbortController();
+    const timer = setTimeout(
+      async () => {
+        if (version !== requestVersion.current) return;
+        setLoading(true);
+        setError("");
+        try {
+          let result: Place[];
+          if (query.trim().length < 2) {
+            const known = PLACES.filter((p) => p.city === app.settings.city);
+            const fix = location.fix;
+            if (fix && haversine(fix, CITIES[app.settings.city].center) <= 60) {
+              const nearby = (await reverseMapPlace(
+                fix,
+                app.settings.city,
+              ).catch(() => null)) as ReferencedPlace | null;
+              const seen = new Set<string>();
+              result = [
+                ...(nearby?.references || []),
+                ...known.sort((a, b) => haversine(fix, a) - haversine(fix, b)),
+              ].filter((p) => {
+                if (seen.has(p.id)) return false;
+                seen.add(p.id);
+                return true;
+              });
+            } else result = known;
+          } else if (LIVE && !app.demo) {
+            const resolved = await resolveMapRequest(
+              query.trim(),
+              app.settings.city,
+              app.settings.language,
+              query.trim().split(/\s+/).length >= 2,
+              controller.signal,
+            );
+            result = resolved.places;
+            if (!disposed && version === requestVersion.current)
+              setResolveNotice(
+                result.length ? app.t("smartSearchConfirm") : "",
+              );
+          } else result = await app.search(query.trim());
+          if (!disposed && version === requestVersion.current)
+            setPlaces(result);
+        } catch (e) {
+          if (!disposed && version === requestVersion.current)
+            setError((e as Error).message);
+        } finally {
+          if (!disposed && version === requestVersion.current)
+            setLoading(false);
+        }
+      },
+      query.trim().length >= 2 ? 700 : 100,
+    );
     return () => {
       disposed = true;
+      controller.abort();
       clearTimeout(timer);
     };
-  }, [query, visible, mapPicking, active, app.settings.city]);
-  const understand = async () => {
-    const version = ++requestVersion.current;
-    setResolving(true);
-    setLoading(false);
-    setError("");
-    setResolveNotice("");
-    try {
-      const result = await resolveMapRequest(
-        query,
-        app.settings.city,
-        app.settings.language,
-        true,
-      );
-      if (version !== requestVersion.current) return;
-      setPlaces(result.places);
-      setResolveNotice(
-        app.t(
-          result.source === "fallback"
-            ? "smartSearchFallback"
-            : "smartSearchConfirm",
-        ),
-      );
-    } catch {
-      if (version === requestVersion.current)
-        setResolveNotice(app.t("smartSearchFallback"));
-    } finally {
-      if (version === requestVersion.current) setResolving(false);
-    }
-  };
+  }, [
+    query,
+    visible,
+    mapPicking,
+    active,
+    app.settings.city,
+    app.settings.language,
+    voiceBusy,
+  ]);
   const activate = (target: Target) => {
     if (active === target) return;
+    requestVersion.current++;
+    setVoiceFeedback({ phase: "idle", level: 0, seconds: 0, message: "" });
     setActive(target);
     setQuery("");
     setPlaces([]);
@@ -226,26 +233,11 @@ export function PlaceSearch({
     }
   };
   const onVoice = (text: string) => {
-    const intent = parseVoice(text, app.settings.language);
-    if (intent.kind === "destination") setQuery(intent.query);
-    else if (intent.kind === "command") {
-      if (intent.action === "recenter") void useCurrentLocation();
-      else if (intent.action === "back") onClose();
-      else if (
-        ["home", "account", "activity", "help"].includes(intent.action)
-      ) {
-        onClose();
-        router.push(
-          intent.action === "home"
-            ? "/(tabs)"
-            : intent.action === "account"
-              ? "/account"
-              : intent.action === "activity"
-                ? "/activity"
-                : "/help",
-        );
-      } else setError(app.t("statusUnavailable"));
-    } else setError(app.t("voiceNotUnderstood"));
+    // This microphone only searches places; it never runs navigation commands.
+    requestVersion.current++;
+    setQuery(text.slice(0, 300));
+    setPlaces([]);
+    setError("");
   };
   const inputRow = (target: Target) => {
     const isActive = !routeMode || active === target;
@@ -284,15 +276,30 @@ export function PlaceSearch({
             target === "pickup" && routeMode ? pickupInput : destinationInput
           }
           accessibilityLabel={routeMode ? label : app.t("searchPlace")}
-          placeholder={routeMode ? place?.name || label : app.t("searchPlace")}
+          placeholder={
+            isActive && voiceBusy
+              ? app.t(
+                  voiceFeedback.phase === "recording"
+                    ? "voiceListening"
+                    : voiceFeedback.phase === "transcribing"
+                      ? "voiceTranscribing"
+                      : "voicePreparing",
+                )
+              : routeMode
+                ? place?.name || label
+                : app.t("searchPlace")
+          }
           placeholderTextColor={C.muted}
           value={isActive ? query : place?.name || ""}
           onFocus={() => activate(target)}
           onChangeText={(value) => {
+            requestVersion.current++;
             setQuery(value);
             setPlaces([]);
           }}
           style={styles.input}
+          editable={!voiceBusy}
+          maxLength={300}
           autoCorrect={false}
           returnKeyType="search"
           selectionColor={C.ink}
@@ -347,6 +354,55 @@ export function PlaceSearch({
             <View style={{ paddingHorizontal: 20, gap: 8 }}>
               {routeMode && inputRow("pickup")}
               {inputRow("destination")}
+              {(voiceBusy || voiceFeedback.message) && (
+                <View
+                  accessibilityLiveRegion="polite"
+                  style={{
+                    minHeight: 28,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  {voiceFeedback.phase === "recording" && (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 3,
+                        height: 24,
+                      }}
+                    >
+                      {[0.6, 1, 0.8, 1, 0.6].map((weight, index) => (
+                        <View
+                          key={index}
+                          style={{
+                            width: 4,
+                            borderRadius: 2,
+                            backgroundColor: C.yellow,
+                            height: 4 + voiceFeedback.level * weight * 20,
+                          }}
+                        />
+                      ))}
+                    </View>
+                  )}
+                  <Txt variant="small" color={C.muted} style={{ flex: 1 }}>
+                    {voiceFeedback.message ||
+                      app.t(
+                        voiceFeedback.phase === "recording"
+                          ? "voiceListening"
+                          : voiceFeedback.phase === "transcribing"
+                            ? "voiceTranscribing"
+                            : "voicePreparing",
+                      )}
+                  </Txt>
+                  {voiceFeedback.phase === "recording" && (
+                    <Txt variant="small" color={C.muted}>
+                      {voiceFeedback.seconds}s
+                    </Txt>
+                  )}
+                </View>
+              )}
               <View
                 style={[
                   s.rowBetween,
@@ -368,35 +424,26 @@ export function PlaceSearch({
                     {app.t("useLocation")}
                   </Txt>
                 </Pressable>
-                <VoiceButton key={active} onResult={onVoice} />
+                {visible && (
+                  <DestinationVoiceButton
+                    key={`${active}-${app.settings.city}-${app.settings.language}`}
+                    onResult={onVoice}
+                    onBusyChange={setVoiceBusy}
+                    onFeedback={setVoiceFeedback}
+                  />
+                )}
               </View>
-              {LIVE && !app.demo && query.trim().length >= 2 && (
-                <View style={{ gap: 4 }}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={app.t("smartSearchAction")}
-                    disabled={resolving}
-                    onPress={() => void understand()}
-                    style={[s.row, { minHeight: 44 }]}
-                  >
-                    {resolving ? (
-                      <ActivityIndicator size="small" color={C.ink} />
-                    ) : (
-                      <Search size={16} color={C.ink} />
-                    )}
-                    <Txt variant="small">{app.t("smartSearchAction")}</Txt>
-                  </Pressable>
-                  <Txt variant="small" color={C.muted}>
-                    {resolveNotice || app.t("smartSearchPrivacy")}
-                  </Txt>
-                </View>
+              {!!resolveNotice && (
+                <Txt variant="small" color={C.muted}>
+                  {resolveNotice}
+                </Txt>
               )}
               <Txt variant="micro" color={C.muted}>
                 {query
-                  ? "RÉSULTATS"
+                  ? app.t("placeResults")
                   : location.fix
-                    ? "LIEUX ET RÉFÉRENCES"
-                    : "LIEUX CONNUS"}
+                    ? app.t("placeLandmarks")
+                    : app.t("placeLandmarks")}
               </Txt>
               {!!error && <Txt color={C.red}>{error}</Txt>}
             </View>

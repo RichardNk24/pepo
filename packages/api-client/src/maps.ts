@@ -61,14 +61,16 @@ export const reverseMapPlace = (point: Point, city: CityId) =>
       ? request<Place>("/reverse", { ...point, city })
       : Promise.resolve(coordinatePlace(point, city));
 
-/** Explicit, authenticated action. No paid AI requests from a demo session. */
+/** Debounced, authenticated search. No paid AI requests from a demo session. */
 export const resolveMapRequest = (
   query: string,
   city: CityId,
   language: string,
   allowAi = false,
+  signal?: AbortSignal,
 ) =>
   api<{ places: Place[]; source: string; status: string }>("/places/resolve", {
     method: "POST",
     body: { query, city, language, allowAi },
+    signal,
   });

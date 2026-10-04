@@ -33,16 +33,25 @@ export class RequestError extends Error {
   constructor(
     message: string,
     public status: number,
+    public code?: string,
   ) {
     super(message);
   }
 }
 export async function api<T>(
   path: string,
-  options: { method?: string; body?: unknown; form?: FormData } = {},
+  options: {
+    method?: string;
+    body?: unknown;
+    form?: FormData;
+    signal?: AbortSignal;
+  } = {},
 ): Promise<T> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 16000);
+  const cancel = () => controller.abort();
+  options.signal?.addEventListener("abort", cancel, { once: true });
+  if (options.signal?.aborted) controller.abort();
+  const timer = setTimeout(cancel, 16000);
   try {
     const response = await fetch(`${API_URL}/api${path}`, {
       method: options.method || "GET",
@@ -69,6 +78,7 @@ export async function api<T>(
       throw new RequestError(
         data.error || "La demande a échoué. Réessayez.",
         response.status,
+        typeof data.code === "string" ? data.code : undefined,
       );
     return data as T;
   } catch (e) {
@@ -79,5 +89,6 @@ export async function api<T>(
     );
   } finally {
     clearTimeout(timer);
+    options.signal?.removeEventListener("abort", cancel);
   }
 }

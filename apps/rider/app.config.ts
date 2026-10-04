@@ -34,6 +34,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     [
+      "expo-audio",
+      {
+        microphonePermission:
+          "Pepo utilise le micro pour rechercher votre destination quand vous appuyez sur Parler.",
+        enableBackgroundRecording: false,
+        enableBackgroundPlayback: false,
+      },
+    ],
+    [
       "expo-speech-recognition",
       {
         microphonePermission:

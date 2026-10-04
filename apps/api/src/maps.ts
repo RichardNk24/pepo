@@ -15,12 +15,20 @@ import {
 } from "@pepo/utils/rules";
 import { applyStopIndices, estimatedStopOrder } from "@pepo/utils/stopOrdering";
 import { localLandmarks } from "./landmarks";
+import { withLocalAliases } from "./map-search/aliases";
+import { localChoices } from "./map-search/intelligence";
+import { destinationQuery } from "./map-search/query";
+import { mergePlaceResults } from "./map-search/results";
 export class MapsError extends Error {}
-async function googleFetch(url: string, options: RequestInit = {}) {
+async function googleFetch(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs = 12000,
+) {
   try {
     const response = await fetch(url, {
       ...options,
-      signal: AbortSignal.timeout(12000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (!response.ok)
       throw new MapsError(
@@ -48,22 +56,18 @@ export async function searchPlaces(
   city: CityId,
   key?: string,
 ): Promise<Place[]> {
-  const local = (await localLandmarks(city)).filter((p) =>
-    `${p.name} ${p.address} ${(p.aliases || []).join(" ")}`
-      .toLocaleLowerCase()
-      .includes(query.toLocaleLowerCase()),
-  );
+  const searchQuery = destinationQuery(query);
+  if (!searchQuery) return [];
+  const catalog = withLocalAliases(await localLandmarks(city));
+  const local = localChoices(query, catalog).candidates;
   if (!key)
-    return [
-      ...local,
-      ...PLACES.filter(
-        (p) =>
-          p.city === city &&
-          `${p.name} ${p.address}`
-            .toLocaleLowerCase()
-            .includes(query.toLocaleLowerCase()),
-      ),
-    ];
+    return mergePlaceResults(
+      local,
+      localChoices(
+        query,
+        PLACES.filter((p) => p.city === city),
+      ).candidates,
+    );
   const data = await googleFetch(
     "https://places.googleapis.com/v1/places:searchText",
     {
@@ -75,7 +79,8 @@ export async function searchPlaces(
           "places.id,places.displayName,places.formattedAddress,places.location,places.attributions",
       },
       body: JSON.stringify({
-        textQuery: `${query}, ${CITIES[city].name}, République démocratique du Congo`,
+        textQuery: `${searchQuery}, ${CITIES[city].name}, République démocratique du Congo`,
+        pageSize: 20,
         languageCode: "fr",
         regionCode: "CD",
         locationBias: {
@@ -83,11 +88,16 @@ export async function searchPlaces(
         },
       }),
     },
+    8000,
   );
   // Third-party listings are excluded until their attribution can be rendered. Google attribution is shown in the search sheet.
   const found: Place[] = (data.places || [])
     .filter(
       (p: any) =>
+        typeof p.id === "string" &&
+        p.id.length > 0 &&
+        typeof p.displayName?.text === "string" &&
+        p.displayName.text.trim().length > 0 &&
         validPoint(p.location) &&
         !p.attributions?.length &&
         !isPlusCode(p.displayName?.text || p.formattedAddress) &&
@@ -101,12 +111,7 @@ export async function searchPlaces(
       ...p.location,
       googleAttribution: true,
     }));
-  const seen = new Set<string>();
-  return [...local, ...found].filter((p) => {
-    if (seen.has(p.id)) return false;
-    seen.add(p.id);
-    return true;
-  });
+  return mergePlaceResults(found, local);
 }
 async function googleNearby(
   point: Point,
