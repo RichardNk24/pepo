@@ -1,0 +1,996 @@
+[
+  {
+    "id": "lshi-osm-node-4088713537",
+    "name": "Al Basha",
+    "aliases": [
+      "Restaurant Al Basha",
+      "Al-Basha"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6486002,
+    "longitude": 27.486309,
+    "address": "10 · Avenue Lumumba · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4088713537",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4547853344",
+    "name": "Arche de Noé",
+    "aliases": [
+      "Arche de Noe",
+      "L’Arche de Noé"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6308477,
+    "longitude": 27.483463,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4547853344",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-way-692428103",
+    "name": "Aérogare de Lubumbashi — Luano",
+    "aliases": [
+      "LUBuMBASHI INTERNATIONAL AIRPORT (FBM)",
+      "Aéroport de Lubumbashi",
+      "Aéroport Luano",
+      "Aéroport international de Lubumbashi",
+      "Luano Airport",
+      "FBM",
+      "Terminal Luano"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.5879473,
+    "longitude": 27.5313066,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/692428103",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Transport"
+    }
+  },
+  {
+    "id": "lshi-osm-way-52349066",
+    "name": "Basilique Sainte-Marie",
+    "aliases": [
+      "Basilique Sainte Marie",
+      "Basilique de la Kenya"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.7014621,
+    "longitude": 27.4834901,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/52349066",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Repères religieux"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4273036204",
+    "name": "Bureaux Gécamines",
+    "aliases": [
+      "Direction Gécamines",
+      "Bureaux de la Gécamines"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6711783,
+    "longitude": 27.4773207,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4273036204",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Repères publics"
+    }
+  },
+  {
+    "id": "lshi-osm-way-281021741",
+    "name": "Bâtiment du 30 Juin",
+    "aliases": [
+      "Bâtiment du 30 Juin",
+      "Bâtiment 30 Juin",
+      "Bâtiment du trente juin",
+      "Théâtre d’Elisabethville"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6506118,
+    "longitude": 27.4779786,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/281021741",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Repères publics"
+    }
+  },
+  {
+    "id": "lshi-osm-way-457975272",
+    "name": "Carrefour Hyper Psaro",
+    "aliases": [
+      "Carrefour",
+      "Hyper Psaro Carrefour",
+      "Carrefour Psaro",
+      "Hyper Psaro",
+      "Psaromatis Carrefour"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6398639,
+    "longitude": 27.486375,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/457975272",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-osm-way-52173211",
+    "name": "Cathédrale Saints-Pierre-et-Paul",
+    "aliases": [
+      "Cathédrale de Lubumbashi",
+      "Cathédrale Saint Pierre et Paul"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.665723,
+    "longitude": 27.4797831,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/52173211",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Repères religieux"
+    }
+  },
+  {
+    "id": "lshi-osm-way-52173208",
+    "name": "Cliniques universitaires de Lubumbashi",
+    "aliases": [
+      "Clinique Universitaire",
+      "Cliniques universitaires",
+      "Cliniques UNILU"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6600247,
+    "longitude": 27.4829001,
+    "address": "Avenue de N'Djamena · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/52173208",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Santé"
+    }
+  },
+  {
+    "id": "lshi-osm-way-52173209",
+    "name": "Collège Imara",
+    "aliases": [
+      "Imara",
+      "Institut Imara",
+      "Collège Saint François de Sales"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6590438,
+    "longitude": 27.4795502,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/52173209",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Éducation"
+    }
+  },
+  {
+    "id": "lshi-osm-node-12484683958",
+    "name": "Complexe La Plage",
+    "aliases": [
+      "Complexe la plage",
+      "La Plage",
+      "Complexe de la Plage",
+      "La Plage Lubumbashi"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6549886,
+    "longitude": 27.4591779,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/12484683958",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Culture et loisirs"
+    }
+  },
+  {
+    "id": "lshi-osm-way-363998678",
+    "name": "Domaine marial de Lubumbashi",
+    "aliases": [
+      "Domaine Marial de Lubumbashi",
+      "Domaine Marial"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6646216,
+    "longitude": 27.4703787,
+    "address": "Avenue Ngongo Lutete · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/363998678",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Repères religieux"
+    }
+  },
+  {
+    "id": "lshi-osm-node-1308996831",
+    "name": "Gare de Lubumbashi — SNCC",
+    "aliases": [
+      "Lubumbashi",
+      "Gare SNCC",
+      "Gare de Lubumbashi",
+      "Gare voyageurs Lubumbashi"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6663228,
+    "longitude": 27.4903373,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/1308996831",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Transport"
+    }
+  },
+  {
+    "id": "lshi-osm-way-596544220",
+    "name": "Gouvernorat du Haut-Katanga",
+    "aliases": [
+      "Gouvernorat Haut Katanga",
+      "Gouvernorat de Lubumbashi"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6665112,
+    "longitude": 27.4783399,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/596544220",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Repères publics"
+    }
+  },
+  {
+    "id": "lshi-osm-node-13045857754",
+    "name": "Hôpital du Cinquantenaire de Lubumbashi",
+    "aliases": [
+      "HÔPITAL DU CINQUANTENAIRE DE LUBUMBASHI",
+      "Hôpital du Cinquantenaire",
+      "Cinquantenaire Karavia"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6620349,
+    "longitude": 27.4178755,
+    "address": "Avenue Muela · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/13045857754",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Santé"
+    }
+  },
+  {
+    "id": "lshi-osm-way-1244869971",
+    "name": "Hôpital général de référence du Haut-Katanga",
+    "aliases": [
+      "Hôpital Général de Référence du Haut-Katanga",
+      "HGR Haut-Katanga",
+      "Hôpital de référence du Haut-Katanga"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.5772977,
+    "longitude": 27.5337141,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/1244869971",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Santé"
+    }
+  },
+  {
+    "id": "lshi-osm-way-52348895",
+    "name": "Hôpital Jason Sendwe",
+    "aliases": [
+      "Hôpital Sendwe",
+      "Jason Sendwe",
+      "Sendwe"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6729242,
+    "longitude": 27.4877913,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/52348895",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Santé"
+    }
+  },
+  {
+    "id": "lshi-osm-way-267731418",
+    "name": "Hôpital SNCC",
+    "aliases": [
+      "Hopital SNCC",
+      "Clinique SNCC"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6613865,
+    "longitude": 27.4919524,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/267731418",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Santé"
+    }
+  },
+  {
+    "id": "lshi-osm-node-3889706784",
+    "name": "Hôtel First Place",
+    "aliases": [
+      "Hotel First Place",
+      "First Place"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6083036,
+    "longitude": 27.5146583,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/3889706784",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Hôtels"
+    }
+  },
+  {
+    "id": "lshi-osm-way-363584884",
+    "name": "Hôtel Hetenu",
+    "aliases": [
+      "Hôtel HETENU",
+      "Hetenu",
+      "Hotel Hetenu"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6382466,
+    "longitude": 27.4147794,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/363584884",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Hôtels"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4553020159",
+    "name": "Hôtel La Fantaisie",
+    "aliases": [
+      "Hotel La Fantaisie",
+      "La Fantaisie"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6439842,
+    "longitude": 27.4832007,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4553020159",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Hôtels"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4273069989",
+    "name": "Hôtel Lubumbashi",
+    "aliases": [
+      "Hotel Lubumbashi"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6604068,
+    "longitude": 27.4863107,
+    "address": "Avenue du 30 Juin · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4273069989",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Hôtels"
+    }
+  },
+  {
+    "id": "lshi-osm-way-362854191",
+    "name": "Institut Maadini",
+    "aliases": [
+      "Institut Maadini Ecole de la General des Carrieres et des Mines(GCM)",
+      "Maadini",
+      "Madini",
+      "Institut Madini",
+      "École Maadini",
+      "Maadini Gécamines"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6549007,
+    "longitude": 27.4688905,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/362854191",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Éducation"
+    }
+  },
+  {
+    "id": "lshi-osm-node-3906155717",
+    "name": "Institut supérieur pédagogique de Lubumbashi",
+    "aliases": [
+      "Institut Supérieur Pédagogique",
+      "ISP Lubumbashi",
+      "ISP"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6532772,
+    "longitude": 27.4669198,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/3906155717",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Éducation"
+    }
+  },
+  {
+    "id": "lshi-osm-way-363584854",
+    "name": "Kin Marché — Faustin",
+    "aliases": [
+      "Kin Marché - Faustin",
+      "Kin Marché Faustin",
+      "Kin Marche Faustin"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6386053,
+    "longitude": 27.415719,
+    "address": "Avenue Munua · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/363584854",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4095859089",
+    "name": "Latté Lounge",
+    "aliases": [
+      "Latté lounge",
+      "Latte Lounge",
+      "Latté"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6442764,
+    "longitude": 27.4823345,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4095859089",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4553020160",
+    "name": "Les Arcades",
+    "aliases": [
+      "Restaurant Les Arcades"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6442085,
+    "longitude": 27.4829331,
+    "address": "27 · Avenue Kilela Balanda · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4553020160",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-node-3906155723",
+    "name": "Marché Eureka",
+    "aliases": [
+      "Marché Euréka"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6526272,
+    "longitude": 27.4838557,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/3906155723",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4232112892",
+    "name": "Marché Kaleja",
+    "aliases": [
+      "Marché de Kaleja"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6764859,
+    "longitude": 27.5063105,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4232112892",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-osm-way-262876229",
+    "name": "Marché Karavia",
+    "aliases": [
+      "Maché Karavia",
+      "Marché de Karavia"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6628877,
+    "longitude": 27.4184549,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/262876229",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-osm-way-364020443",
+    "name": "Marché Lido",
+    "aliases": [
+      "Marché de Lido"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6635361,
+    "longitude": 27.4682212,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/364020443",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4234707814",
+    "name": "Marché Moïse",
+    "aliases": [
+      "Marché Moise",
+      "Marché de Moïse"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6027454,
+    "longitude": 27.4652061,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4234707814",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-osm-node-13045834925",
+    "name": "Monte Carlo Restaurant",
+    "aliases": [
+      "MONTE CARLO Restaurant",
+      "Restaurant Monte Carlo",
+      "Monte Carlo"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6633482,
+    "longitude": 27.4111113,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/13045834925",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-node-3906155721",
+    "name": "Musée national de Lubumbashi",
+    "aliases": [
+      "Musée de Lubumbashi",
+      "Musée national",
+      "National Museum of Lubumbashi"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6496284,
+    "longitude": 27.477091,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/3906155721",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Culture et loisirs"
+    }
+  },
+  {
+    "id": "lshi-accor-novotel",
+    "name": "Novotel Lubumbashi",
+    "aliases": [
+      "Novotel",
+      "Hôtel Novotel"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.65595,
+    "longitude": 27.45978,
+    "address": "01 avenue Mpala, quartier Golf · Accès à confirmer",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://all.accor.com/hotel/B714/index.fr.shtml",
+      "retrieved": "2026-10-03",
+      "position_type": "point GPS publié par l’hôtel",
+      "field_verified": false,
+      "category": "Hôtels"
+    }
+  },
+  {
+    "id": "lshi-osm-node-13098518801",
+    "name": "Psaro — La Plage",
+    "aliases": [
+      "Psaro",
+      "Psaro La Plage",
+      "Psaro Golf"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6552929,
+    "longitude": 27.4582192,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/13098518801",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Marchés et commerces"
+    }
+  },
+  {
+    "id": "lshi-accor-pullman",
+    "name": "Pullman Lubumbashi Grand Karavia",
+    "aliases": [
+      "Pullman",
+      "Grand Karavia",
+      "Hôtel Karavia"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.655877,
+    "longitude": 27.454753,
+    "address": "55 Route du Golf, quartier Golf · Accès à confirmer",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://all.accor.com/hotel/A0T4/index.fr.shtml",
+      "retrieved": "2026-10-03",
+      "position_type": "point GPS publié par l’hôtel",
+      "field_verified": false,
+      "category": "Hôtels"
+    }
+  },
+  {
+    "id": "lshi-osm-way-267725057",
+    "name": "Stade TP Mazembe",
+    "aliases": [
+      "Stade Mazembe",
+      "Stade Tout Puissant Mazembe",
+      "Nouveau Stade Mazembe"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6783807,
+    "longitude": 27.4893055,
+    "address": "Avenue du Lwapula · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/267725057",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Culture et loisirs"
+    }
+  },
+  {
+    "id": "lshi-osm-way-261927871",
+    "name": "Stadium Joseph Kabila",
+    "aliases": [],
+    "city": "lubumbashi",
+    "latitude": -11.675043,
+    "longitude": 27.4620194,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/261927871",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Culture et loisirs"
+    }
+  },
+  {
+    "id": "lshi-osm-node-13098472801",
+    "name": "SteakHouse RDC",
+    "aliases": [
+      "Steak House RDC",
+      "Steakhouse"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.640705,
+    "longitude": 27.4468949,
+    "address": "Avenue Mweka · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/13098472801",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-node-13098471502",
+    "name": "TipTop Restaurant & Lounge",
+    "aliases": [
+      "Tip Top",
+      "Tiptop"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6515553,
+    "longitude": 27.4493552,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/13098471502",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-node-4763811821",
+    "name": "Tony & Tony",
+    "aliases": [
+      "Tony Tony",
+      "Mezepolis"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6530468,
+    "longitude": 27.4741083,
+    "address": "13 · Square Forrest · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/node/4763811821",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "nœud OSM",
+      "field_verified": false,
+      "category": "Restaurants"
+    }
+  },
+  {
+    "id": "lshi-osm-way-260751112",
+    "name": "Université de Lubumbashi — campus",
+    "aliases": [
+      "Université de Lubumbashi",
+      "UNILU",
+      "Campus UNILU",
+      "Concession UNILU"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6129813,
+    "longitude": 27.4800836,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/260751112",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Éducation"
+    }
+  },
+  {
+    "id": "lshi-osm-way-374380946",
+    "name": "Université Nouveaux Horizons — Route Kasapa",
+    "aliases": [
+      "Université Nouveaux Horizons",
+      "UNH Route Kasapa",
+      "UNH",
+      "Université Nouvel Horizon"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6283916,
+    "longitude": 27.4844,
+    "address": "Route Kasapa · Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/374380946",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Éducation"
+    }
+  },
+  {
+    "id": "lshi-osm-way-802486913",
+    "name": "Université protestante de Lubumbashi",
+    "aliases": [
+      "Université Protestante de Lubumbashi -UPL",
+      "UPL",
+      "Université protestante",
+      "UPL Lubumbashi"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.652316,
+    "longitude": 27.4826103,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/802486913",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Éducation"
+    }
+  },
+  {
+    "id": "lshi-osm-way-35154775",
+    "name": "Zoo de Lubumbashi",
+    "aliases": [
+      "Jardin zoologique de Lubumbashi",
+      "Zoo Lubumbashi"
+    ],
+    "city": "lubumbashi",
+    "latitude": -11.6687028,
+    "longitude": 27.4742302,
+    "address": "Lubumbashi · Accès à confirmer · © OpenStreetMap",
+    "entrances": [],
+    "_provenance": {
+      "source": "https://www.openstreetmap.org/way/35154775",
+      "license": "ODbL-1.0",
+      "retrieved": "2026-10-03",
+      "position_type": "centroïde du polygone OSM ; pas une entrée",
+      "field_verified": false,
+      "category": "Culture et loisirs"
+    }
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "name": "@pepo/types",
+  "version": "1.2.0",
+  "private": true,
+  "exports": {
+    "./model": "./src/model.ts"
+  },
+  "dependencies": {},
+  "peerDependencies": {},
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@pepo/ui",
+  "version": "1.2.0",
+  "private": true,
+  "exports": {
+    "./ContactEditor": "./src/ContactEditor.tsx",
+    "./PepoLogo": "./src/PepoLogo.tsx",
+    "./UI": "./src/UI.tsx",
+    "./BrandSplash": "./src/BrandSplash.tsx"
+  },
+  "dependencies": {
+    "@pepo/config": "1.2.0",
+    "@pepo/api-client": "1.2.0",
+    "@pepo/i18n": "1.2.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "expo-router": "~57.0.24",
+    "react-native-svg": "15.15.4",
+    "@pepo/types": "1.2.0",
+    "lucide-react-native": "^1.48.0"
+  },
+  "peerDependencies": {
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "expo": "~57.0.26"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

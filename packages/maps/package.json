@@ -1,0 +1,47 @@
+{
+  "name": "@pepo/maps",
+  "version": "1.2.0",
+  "private": true,
+  "exports": {
+    "./googleDocument": "./src/googleDocument.ts",
+    "./demoFleet": "./src/demoFleet.ts",
+    "./VehicleArt": "./src/VehicleArt.tsx",
+    "./MapBoard": {
+      "browser": "./src/MapBoard.web.tsx",
+      "react-native": "./src/MapBoard.native.tsx",
+      "default": "./src/MapBoard.tsx"
+    },
+    "./RouteGlow.native": "./src/RouteGlow.native.tsx",
+    "./vehicleMetrics": "./src/vehicleMetrics.ts",
+    "./MapBoard.web": "./src/MapBoard.web.tsx",
+    "./MapBoard.native": "./src/MapBoard.native.tsx",
+    "./GoogleMap.native": "./src/GoogleMap.native.tsx",
+    "./DemoMap": "./src/DemoMap.tsx",
+    "./MapTypes": "./src/MapTypes.ts",
+    "./MapVehicle": "./src/MapVehicle.tsx",
+    "./useMapMotion": "./src/useMapMotion.ts",
+    "./vehicleCatalog.generated": "./src/vehicleCatalog.generated.ts"
+  },
+  "dependencies": {
+    "@pepo/types": "1.2.0",
+    "@pepo/config": "1.2.0",
+    "@pepo/utils": "1.2.0",
+    "@pepo/ui": "1.2.0",
+    "@pepo/api-client": "1.2.0",
+    "@pepo/i18n": "1.2.0",
+    "react-native-maps": "1.27.2",
+    "react-native-svg": "15.15.4",
+    "expo-asset": "~57.0.18",
+    "react-native-webview": "13.16.1",
+    "expo-router": "~57.0.24",
+    "expo-constants": "~57.0.20"
+  },
+  "peerDependencies": {
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "expo": "~57.0.26"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

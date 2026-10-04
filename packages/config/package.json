@@ -1,0 +1,13 @@
+{
+  "name": "@pepo/config",
+  "version": "1.2.0",
+  "private": true,
+  "exports": {
+    "./tokens": "./src/tokens.ts"
+  },
+  "dependencies": {},
+  "peerDependencies": {},
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

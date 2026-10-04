@@ -1,0 +1,27 @@
+{
+  "name": "@pepo/session",
+  "version": "1.2.0",
+  "private": true,
+  "exports": {
+    "./LocationProvider": "./src/LocationProvider.tsx",
+    "./AppProvider": "./src/AppProvider.tsx"
+  },
+  "dependencies": {
+    "@pepo/types": "1.2.0",
+    "@pepo/utils": "1.2.0",
+    "@pepo/api-client": "1.2.0",
+    "@pepo/i18n": "1.2.0",
+    "expo-crypto": "~57.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "socket.io-client": "^4.8.1",
+    "expo-location": "~57.0.20"
+  },
+  "peerDependencies": {
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "expo": "~57.0.26"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

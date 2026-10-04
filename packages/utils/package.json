@@ -1,0 +1,22 @@
+{
+  "name": "@pepo/utils",
+  "version": "1.2.0",
+  "private": true,
+  "exports": {
+    "./stopOrdering": "./src/stopOrdering.ts",
+    "./routePulse": "./src/routePulse.ts",
+    "./mapGeometry": "./src/mapGeometry.ts",
+    "./cities": "./src/cities.ts",
+    "./placeReferences": "./src/placeReferences.ts",
+    "./rules": "./src/rules.ts",
+    "./onboarding": "./src/onboarding.ts",
+    "./scheduling": "./src/scheduling.ts"
+  },
+  "dependencies": {
+    "@pepo/types": "1.2.0"
+  },
+  "peerDependencies": {},
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}
