@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { moneyMethodsIssue } from "@pepo/utils/mobileMoney";
 
 import {
   ApiError,
@@ -63,14 +64,21 @@ export function register_users(ctx: RouteContext) {
           patch.trustedContacts.length
       )
         throw new ApiError(400, "Ce contact est déjà enregistré.");
-      if (
-        patch.paymentMethods &&
-        (new Set(patch.paymentMethods.map((m) => m.id)).size !==
-          patch.paymentMethods.length ||
-          new Set(patch.paymentMethods.map((m) => m.provider + m.phone))
-            .size !== patch.paymentMethods.length)
-      )
-        throw new ApiError(400, "Ce numéro Mobile Money est déjà enregistré.");
+      if (patch.paymentMethods) {
+        const issue = moneyMethodsIssue(
+          patch.paymentMethods,
+          req.actor.paymentMethods || [],
+        );
+        const messages = {
+          moneyDuplicate: "Ce numéro Mobile Money est déjà enregistré.",
+          moneyNetworkMismatch:
+            "Le réseau ne correspond pas au numéro Mobile Money.",
+          moneyTwoNumbers: "Vous pouvez enregistrer deux numéros par réseau.",
+          moneyUnknownNetwork:
+            "Choisissez un numéro Airtel Money, M-Pesa ou Orange Money.",
+        };
+        if (issue) throw new ApiError(400, messages[issue]);
+      }
       if (patch.trustedContacts)
         patch.emergencyContact = patch.trustedContacts[0] || null;
       if (

@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "Pepo Driver",
   slug: "pepo-driver",
   scheme: "pepo-driver",
-  version: "1.1.1",
+  version: "0.0.1",
   orientation: "portrait",
   userInterfaceStyle: "light",
   icon: "../../packages/ui/assets/brand/pepo-logo.jpg",

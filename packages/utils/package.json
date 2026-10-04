@@ -10,7 +10,8 @@
     "./placeReferences": "./src/placeReferences.ts",
     "./rules": "./src/rules.ts",
     "./onboarding": "./src/onboarding.ts",
-    "./scheduling": "./src/scheduling.ts"
+    "./scheduling": "./src/scheduling.ts",
+    "./mobileMoney": "./src/mobileMoney.ts"
   },
   "dependencies": {
     "@pepo/types": "1.2.0"

@@ -65,6 +65,10 @@ export default function Layout() {
                   <Stack.Screen name="messages" />
                   <Stack.Screen name="documents" />
                   <Stack.Screen
+                    name="account-safety"
+                    options={{ presentation: "modal" }}
+                  />
+                  <Stack.Screen
                     name="help"
                     options={{ presentation: "modal" }}
                   />

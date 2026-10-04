@@ -205,7 +205,7 @@ export default function Account() {
             "Sécurité et assistance",
             "Partager une course, signaler un problème",
             ShieldCheck,
-            () => router.push("/(tabs)/safety"),
+            () => router.push("/account-safety"),
           )}
         </View>
         <View
@@ -247,7 +247,7 @@ export default function Account() {
           }}
         />
         <Txt variant="small" color={C.muted} style={{ textAlign: "center" }}>
-          pepo · 1.1.1
+          pepo · 0.0.1
         </Txt>
       </ScrollView>
       <ContactEditor

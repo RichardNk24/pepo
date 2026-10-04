@@ -171,9 +171,11 @@ describe("Account privacy and persistence", () => {
   });
   it("stores Mobile Money numbers but refuses card details and duplicate wallets", async () => {
     const p = await user();
-    const paymentMethods = ["airtel", "mpesa", "orange", "afri"].map(
-      (provider, i) => ({ id: String(i), provider, phone: "+243812345678" }),
-    );
+    const paymentMethods = [
+      { id: "0", provider: "airtel", phone: "+243992345678" },
+      { id: "1", provider: "mpesa", phone: "+243812345678" },
+      { id: "2", provider: "orange", phone: "+243842345678" },
+    ];
     await request(app)
       .patch("/api/me")
       .set(auth(p.token))
@@ -205,5 +207,79 @@ describe("Account privacy and persistence", () => {
       .set(auth(p.token))
       .send({ paymentMethods: [{ ...paymentMethods[0], phone: "+243123" }] })
       .expect(400);
+  });
+  it("enforces two numbers per network and prefix detection on the server", async () => {
+    const p = await user();
+    const methods = [
+      { id: "1", provider: "airtel", phone: "+243972345678" },
+      { id: "2", provider: "airtel", phone: "+243982345678" },
+    ];
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({ paymentMethods: methods })
+      .expect(200);
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({
+        paymentMethods: [
+          ...methods,
+          { id: "3", provider: "airtel", phone: "+243992345678" },
+        ],
+      })
+      .expect(400);
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({
+        paymentMethods: [
+          { id: "4", provider: "orange", phone: "+243812345678" },
+        ],
+      })
+      .expect(400);
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({
+        paymentMethods: [{ id: "4", provider: "afri", phone: "+243912345678" }],
+      })
+      .expect(400);
+    expect(store.user(p.profile.id)?.paymentMethods).toEqual(methods);
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({ paymentMethods: methods.slice(1) })
+      .expect(200);
+    expect(store.user(p.profile.id)?.paymentMethods).toEqual(methods.slice(1));
+  });
+  it("keeps historical numbers without allowing new unsupported records", async () => {
+    const p = await user();
+    const old = [
+      { id: "afri", provider: "afri" as const, phone: "+243912345678" },
+      { id: "mismatch", provider: "airtel" as const, phone: "+243812345678" },
+    ];
+    store.saveUser({ ...store.user(p.profile.id)!, paymentMethods: old });
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({
+        paymentMethods: [
+          ...old,
+          { id: "new", provider: "orange", phone: "+243852345678" },
+        ],
+      })
+      .expect(200);
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({ paymentMethods: [{ ...old[0], id: "new-afri" }] })
+      .expect(400);
+    await request(app)
+      .patch("/api/me")
+      .set(auth(p.token))
+      .send({ paymentMethods: [] })
+      .expect(200);
+    expect(store.user(p.profile.id)?.paymentMethods).toEqual([]);
   });
 });
