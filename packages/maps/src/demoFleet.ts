@@ -1,4 +1,4 @@
-import type { Point,VehicleKind } from "@pepo/types/model";
+import type { Point, VehicleKind } from "@pepo/types/model";
 export type DemoVehicle = Point & {
   id: string;
   kind: VehicleKind;
@@ -498,7 +498,10 @@ const ROAD_LOOPS = [
     ],
   },
 ] as const;
-export function demoFleet(center: Point): DemoVehicle[] {
+export function demoFleet(
+  center: Point,
+  selectedKind?: VehicleKind,
+): DemoVehicle[] {
   const inLubumbashi =
     Math.hypot(center.latitude + 11.664, (center.longitude - 27.479) * 0.98) <
     0.18;
@@ -511,7 +514,7 @@ export function demoFleet(center: Point): DemoVehicle[] {
       }));
       return {
         id: `demo-lubumbashi-${i}`,
-        kind: i % 2 === 0 ? "moto" : "taxi",
+        kind: selectedKind ?? (i % 2 === 0 ? "moto" : "taxi"),
         ...path[0],
         path,
         phase: [0.12, 0.28, 0.48, 0.65, 0.72, 0.85][i],
@@ -527,7 +530,7 @@ export function demoFleet(center: Point): DemoVehicle[] {
     [-0.0003, 0.003],
   ].map(([lat, lon], i) => ({
     id: `demo-vehicle-${i}`,
-    kind: i % 2 === 0 ? "moto" : "taxi",
+    kind: selectedKind ?? (i % 2 === 0 ? "moto" : "taxi"),
     latitude: center.latitude + lat,
     longitude: center.longitude + lon,
   }));

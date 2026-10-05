@@ -1,15 +1,23 @@
 import { createRoutePulse } from "@pepo/utils/routePulse";
 import { createFleetMotion } from "./demoFleet";
 import { MAP_STYLE } from "./MapTypes";
-import { VEHICLE_METRICS, type VehicleImageUrls } from "./vehicleMetrics";
+import type { VehicleImageUrls } from "./vehicleMetrics";
 const json = (value: unknown) => JSON.stringify(value).replace(/</g, "\\u003c");
 /** Shared renderer: browser iframe and Expo Go WebView use the same interaction model. */
 export function googleMapDocument(
   key: string,
   nonce = "",
   images: VehicleImageUrls = {
-    taxi: "/maps/assets/car-top.png",
-    moto: "/maps/assets/moto-top.png",
+    moto: "/maps/assets/moto",
+    motoSend: "/maps/assets/motoSend",
+    taxi: "/maps/assets/taxi",
+    suv: "/maps/assets/suv",
+    minibus: "/maps/assets/minibus",
+    tricycle: "/maps/assets/tricycle",
+    truck: "/maps/assets/truck",
+    pickupTruck: "/maps/assets/pickupTruck",
+    comfort: "/maps/assets/comfort",
+    fourByFour: "/maps/assets/fourByFour",
   },
 ) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style nonce="${nonce}">html,body,#map{margin:0;width:100%;height:100%;background:#E5E9EC}#notice{position:absolute;top:85px;left:20px;right:20px;padding:14px;background:white;border-radius:12px;font:14px system-ui;color:#172111;display:none}</style></head><body><div id="map" aria-label="Carte Google Maps interactive"></div><div id="notice" role="alert"></div><script nonce="${nonce}">
@@ -31,15 +39,16 @@ export function googleMapDocument(
     if(motionQuery&&motionQuery.addEventListener)motionQuery.addEventListener('change',function(e){reduced=e.matches;startPulse();startFleet();});
     window.addEventListener('pagehide',function(){stopPulse();stopFleet();fleet.forEach(function(m){m.setMap(null);});cancelAnimationFrame(cameraFrame);clearTimeout(timer);clearTimeout(resizeTimer);});
 
-    var vehicleMetrics=${json(VEHICLE_METRICS)},vehicleImages=${json(images)};
-    function vehicleIcon(kind){var type=['taxi','suv','fourByFour','minibus','tricycle','truck','pickupTruck'].indexOf(kind)>=0?'taxi':'moto',m=vehicleMetrics[type],scale=m.displayHeight/m.cropHeight,w=m.cropWidth*scale,h=m.displayHeight;return {url:vehicleImages[type],scaledSize:new google.maps.Size(m.width*scale,m.height*scale),size:new google.maps.Size(w,h),origin:new google.maps.Point(m.x*scale,m.y*scale),anchor:new google.maps.Point(w/2,h/2)};}
+    var vehicleImages=${json(images)};
+    function vehicleIcon(kind){var url=vehicleImages[kind]||vehicleImages.moto;return {url:url,scaledSize:new google.maps.Size(40,40),anchor:new google.maps.Point(20,20)};}
     // DOM overlays allow the supplied PNG vehicles to rotate at intersections.
     function fleetMarker(kind){
       var overlay=new google.maps.OverlayView(),position=null,visible=false,angle=0,node;
-      var type=['taxi','suv','fourByFour','minibus','tricycle','truck','pickupTruck'].indexOf(kind)>=0?'taxi':'moto',m=vehicleMetrics[type];
-      var h=m.displayHeight,w=m.cropWidth*h/m.cropHeight;
-      overlay.onAdd=function(){node=document.createElement('div');node.style.cssText='position:absolute;pointer-events:none;width:'+w+'px;height:'+h+'px;transform-origin:center;will-change:transform';node.setAttribute('aria-label','Véhicule de démonstration, non réservable');
-        var ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),img=document.createElementNS(ns,'image');svg.setAttribute('width',w);svg.setAttribute('height',h);svg.setAttribute('viewBox',[m.x,m.y,m.cropWidth,m.cropHeight].join(' '));img.setAttribute('href',vehicleImages[type]);img.setAttribute('width',m.width);img.setAttribute('height',m.height);svg.appendChild(img);node.appendChild(svg);overlay.getPanes().overlayLayer.appendChild(node);overlay.draw();};
+      var w=38,h=38;
+      overlay.onAdd=function(){node=document.createElement('div');node.style.cssText='position:absolute;pointer-events:none;width:'+w+'px;height:'+h+'px;transform-origin:center;will-change:transform';node.setAttribute('aria-label',kind==='motoSend'?'Moto avec colis, démonstration':'Véhicule de démonstration, non réservable');
+        var img=document.createElement('img');img.src=vehicleImages[kind]||vehicleImages.moto;img.alt='';img.draggable=false;img.style.cssText='width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.28))';node.appendChild(img);
+        if(kind==='motoSend'){var box=document.createElement('span');box.textContent='▣';box.style.cssText='position:absolute;top:-1px;right:-1px;width:15px;height:15px;border:1px solid #172111;border-radius:4px;background:#F7D549;color:#172111;font:11px/13px system-ui;text-align:center';node.appendChild(box);}
+        overlay.getPanes().overlayLayer.appendChild(node);overlay.draw();};
       overlay.draw=function(){if(!node)return;node.style.display=visible&&position?'block':'none';if(!position)return;var pt=overlay.getProjection().fromLatLngToDivPixel(new google.maps.LatLng(position.lat,position.lng));if(pt){node.style.left=pt.x+'px';node.style.top=pt.y+'px';node.style.transform='translate(-50%,-50%) rotate('+angle+'deg)';}};
       overlay.onRemove=function(){if(node)node.remove();node=null;};
       overlay.setVisible=function(v){visible=v;overlay.draw();};

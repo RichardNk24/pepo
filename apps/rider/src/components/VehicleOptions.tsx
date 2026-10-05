@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { Clock3, DollarSign, Users } from "lucide-react-native";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Pressable, View } from "react-native";
 
 import Animated, { LinearTransition } from "react-native-reanimated";
@@ -11,44 +11,35 @@ import type { VehicleKind } from "@pepo/types/model";
 import { Txt } from "@pepo/ui/UI";
 import { VEHICLES } from "@pepo/utils/cities";
 import { fare, suggestedFare } from "@pepo/utils/rules";
+import {
+  isVehicleVisible,
+  shouldShowVehicleDetails,
+  type VehicleOptionsDensity,
+} from "../domain/rideLayout";
+import { SnapSheetScrollContext } from "./SnapSheet";
 
 type SortMode = "recommended" | "faster" | "price";
-
-/**
- * Essaie de récupérer une ETA directement depuis les données véhicule.
- *
- * Cela permet au filtre "Plus rapide" de fonctionner si VEHICLES
- * possède déjà pickupMinutes ou etaMinutes.
- */
-function getPickupMinutes(vehicle: (typeof VEHICLES)[number]) {
-  const candidate = vehicle as (typeof VEHICLES)[number] & {
-    pickupMinutes?: number;
-    etaMinutes?: number;
-  };
-
-  if (typeof candidate.pickupMinutes === "number") {
-    return candidate.pickupMinutes;
-  }
-
-  if (typeof candidate.etaMinutes === "number") {
-    return candidate.etaMinutes;
-  }
-
-  return null;
-}
 
 export function VehicleOptions({
   value,
   onChange,
   distanceKm,
   priceReady,
+  density = "expanded",
+  pickupEtaMinutes = {},
 }: {
   value: VehicleKind;
   onChange: (kind: VehicleKind) => void;
   distanceKm: number;
   priceReady: boolean;
+  density?: VehicleOptionsDensity;
+  /** Live pickup estimates from dispatch, keyed by vehicle type. */
+  pickupEtaMinutes?: Partial<Record<VehicleKind, number>>;
 }) {
   const [sort, setSort] = useState<SortMode>("recommended");
+  const sheetScroll = useContext(SnapSheetScrollContext);
+  const [sectionY, setSectionY] = useState(0);
+  const [selectedRowY, setSelectedRowY] = useState(0);
 
   /**
    * On conserve originalIndex afin que :
@@ -57,7 +48,7 @@ export function VehicleOptions({
    * - "Plus rapide" ne crée pas d'ordre arbitraire
    *   si les ETA ne sont pas encore disponibles.
    */
-  const vehicles = VEHICLES.map((vehicle, originalIndex) => ({
+  const sortedVehicles = VEHICLES.map((vehicle, originalIndex) => ({
     ...vehicle,
     originalIndex,
   })).sort((a, b) => {
@@ -72,8 +63,8 @@ export function VehicleOptions({
      * PLUS RAPIDE
      */
     if (sort === "faster") {
-      const aMinutes = getPickupMinutes(a);
-      const bMinutes = getPickupMinutes(b);
+      const aMinutes = pickupEtaMinutes[a.id] ?? null;
+      const bMinutes = pickupEtaMinutes[b.id] ?? null;
 
       if (aMinutes !== null && bMinutes !== null) {
         return aMinutes - bMinutes;
@@ -90,6 +81,16 @@ export function VehicleOptions({
      */
     return a.originalIndex - b.originalIndex;
   });
+  useEffect(() => {
+    if (!sheetScroll) return;
+    const frame = requestAnimationFrame(() => {
+      sheetScroll.scrollTo(
+        density === "expanded" ? 0 : sectionY + selectedRowY,
+        false,
+      );
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [density, sectionY, selectedRowY, sheetScroll, value, sort]);
 
   /**
    * SÉLECTION D'UN VÉHICULE
@@ -126,6 +127,7 @@ export function VehicleOptions({
 
   return (
     <View
+      onLayout={(event) => setSectionY(event.nativeEvent.layout.y)}
       style={{
         marginTop: 10,
         width: "100%",
@@ -135,43 +137,45 @@ export function VehicleOptions({
           FILTRES
       ====================================================== */}
 
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
+      {density === "expanded" && (
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
 
-          gap: 8,
+            gap: 8,
 
-          paddingHorizontal: 12,
+            paddingHorizontal: 12,
 
-          marginBottom: 10,
-        }}
-      >
-        <SortButton
-          label="Recommandés"
-          selected={sort === "recommended"}
-          width={124}
-          onPress={() => selectSort("recommended")}
-        />
+            marginBottom: 10,
+          }}
+        >
+          <SortButton
+            label="Recommandés"
+            selected={sort === "recommended"}
+            width={124}
+            onPress={() => selectSort("recommended")}
+          />
 
-        <SortButton
-          label="Plus rapide"
-          selected={sort === "faster"}
-          icon="clock"
-          width={118}
-          onPress={() => selectSort("faster")}
-        />
+          <SortButton
+            label="Plus rapide"
+            selected={sort === "faster"}
+            icon="clock"
+            width={118}
+            onPress={() => selectSort("faster")}
+          />
 
-        <SortButton
-          label="Moins cher"
-          selected={sort === "price"}
-          icon="price"
-          width={118}
-          onPress={() => selectSort("price")}
-        />
-      </View>
+          <SortButton
+            label="Moins cher"
+            selected={sort === "price"}
+            icon="price"
+            width={118}
+            onPress={() => selectSort("price")}
+          />
+        </View>
+      )}
 
       {/* ======================================================
           LISTE DES VÉHICULES
@@ -183,17 +187,19 @@ export function VehicleOptions({
           paddingHorizontal: 4,
         }}
       >
-        {vehicles.map((v, index) => {
+        {sortedVehicles.map((v, index) => {
           const selected = value === v.id;
+          const visible = isVehicleVisible(v.id, value, density);
+          const showDetails = shouldShowVehicleDetails(v.id, value, density);
 
           const amount = priceReady
             ? fare(suggestedFare(distanceKm, v.id))
             : "—";
 
-          const pickupMinutes = getPickupMinutes(v);
+          const pickupMinutes = pickupEtaMinutes[v.id] ?? null;
 
           const previousSelected =
-            index > 0 && value === vehicles[index - 1]?.id;
+            index > 0 && value === sortedVehicles[index - 1]?.id;
 
           return (
             /**
@@ -208,7 +214,25 @@ export function VehicleOptions({
              * LinearTransition anime automatiquement le
              * déplacement vertical vers la nouvelle place.
              */
-            <Animated.View key={v.id} layout={LinearTransition.duration(280)}>
+            <Animated.View
+              key={v.id}
+              layout={LinearTransition.duration(320)}
+              onLayout={
+                selected
+                  ? (event) => setSelectedRowY(event.nativeEvent.layout.y)
+                  : undefined
+              }
+              style={
+                !visible
+                  ? { height: 0, opacity: 0, overflow: "hidden" }
+                  : undefined
+              }
+              pointerEvents={visible ? "auto" : "none"}
+              accessibilityElementsHidden={!visible}
+              importantForAccessibility={
+                visible ? "auto" : "no-hide-descendants"
+              }
+            >
               <Pressable
                 accessibilityRole="radio"
                 accessibilityLabel={v.name}
@@ -228,11 +252,12 @@ export function VehicleOptions({
                    * Aucun zoom / déplacement lorsque
                    * la sélection change.
                    */
-                  minHeight: 118,
+                  minHeight:
+                    density === "expanded" ? 118 : showDetails ? 118 : 88,
 
                   paddingLeft: 5,
                   paddingRight: 8,
-                  paddingVertical: 12,
+                  paddingVertical: showDetails ? 12 : 7,
 
                   /**
                    * Le border existe constamment.
@@ -258,8 +283,8 @@ export function VehicleOptions({
 
                 <View
                   style={{
-                    width: 105,
-                    minWidth: 105,
+                    width: 76,
+                    minWidth: 76,
 
                     alignItems: "center",
                     justifyContent: "center",
@@ -267,7 +292,7 @@ export function VehicleOptions({
                     marginRight: 6,
                   }}
                 >
-                  <VehicleArt kind={v.id} width={101} />
+                  <VehicleArt kind={v.id} width={72} />
                 </View>
 
                 {/* =============================================
@@ -301,7 +326,7 @@ export function VehicleOptions({
                       flexDirection: "row",
                       alignItems: "center",
                       gap: 8,
-                      marginBottom: 4,
+                      marginBottom: showDetails ? 4 : 0,
                     }}
                   >
                     {pickupMinutes !== null && (
@@ -349,17 +374,19 @@ export function VehicleOptions({
 
                   {/* Description */}
 
-                  <Txt
-                    variant="small"
-                    color={C.muted}
-                    numberOfLines={2}
-                    style={{
-                      fontSize: 14.5,
-                      lineHeight: 19,
-                    }}
-                  >
-                    {v.detail}
-                  </Txt>
+                  {showDetails && (
+                    <Txt
+                      variant="small"
+                      color={C.muted}
+                      numberOfLines={2}
+                      style={{
+                        fontSize: 14.5,
+                        lineHeight: 19,
+                      }}
+                    >
+                      {v.detail}
+                    </Txt>
+                  )}
                 </View>
 
                 {/* =============================================
@@ -389,7 +416,7 @@ export function VehicleOptions({
                     {amount}
                   </Txt>
 
-                  {priceReady && (
+                  {priceReady && showDetails && (
                     <Txt
                       variant="small"
                       color={C.muted}
@@ -412,19 +439,21 @@ export function VehicleOptions({
                   SÉPARATEUR
               ============================================== */}
 
-              {index < vehicles.length - 1 && (
-                <View
-                  style={{
-                    height: 1,
+              {visible &&
+                density !== "selected" &&
+                index < sortedVehicles.length - 1 && (
+                  <View
+                    style={{
+                      height: 1,
 
-                    marginLeft: 111,
-                    marginRight: 6,
+                      marginLeft: 80,
+                      marginRight: 6,
 
-                    backgroundColor:
-                      selected || previousSelected ? "transparent" : C.line,
-                  }}
-                />
-              )}
+                      backgroundColor:
+                        selected || previousSelected ? "transparent" : C.line,
+                    }}
+                  />
+                )}
             </Animated.View>
           );
         })}

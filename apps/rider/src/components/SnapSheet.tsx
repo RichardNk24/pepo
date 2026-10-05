@@ -1,5 +1,5 @@
 import { C } from "@pepo/config/tokens";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   PanResponder,
@@ -10,6 +10,10 @@ import {
   type ScrollViewProps,
 } from "react-native";
 import { sheetGeometry } from "../domain/rideLayout";
+
+export const SnapSheetScrollContext = createContext<{
+  scrollTo: (y: number, animated?: boolean) => void;
+} | null>(null);
 
 // A separate handle always remains draggable, even while the list is scrolled.
 export function SnapSheet({
@@ -40,6 +44,14 @@ export function SnapSheet({
   const current = useRef(snaps[1]);
   const start = useRef(current.current);
   const offset = useRef(0);
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollController = useMemo(
+    () => ({
+      scrollTo: (y: number, animated = false) =>
+        scrollRef.current?.scrollTo({ y: Math.max(0, y), animated }),
+    }),
+    [],
+  );
   const callback = useRef(onHeight);
   callback.current = onHeight;
   const movingCallback = useRef(onMoving);
@@ -156,19 +168,22 @@ export function SnapSheet({
         </Pressable>
       </View>
       <View {...contentPan.panHandlers} style={{ flex: 1 }}>
-        <ScrollView
-          {...props}
-          style={{ flex: 1 }}
-          bounces={false}
-          nestedScrollEnabled
-          scrollEventThrottle={16}
-          onScroll={(e) => {
-            offset.current = e.nativeEvent.contentOffset.y;
-            props.onScroll?.(e);
-          }}
-        >
-          {children}
-        </ScrollView>
+        <SnapSheetScrollContext.Provider value={scrollController}>
+          <ScrollView
+            {...props}
+            ref={scrollRef}
+            style={{ flex: 1 }}
+            bounces={false}
+            nestedScrollEnabled
+            scrollEventThrottle={16}
+            onScroll={(e) => {
+              offset.current = e.nativeEvent.contentOffset.y;
+              props.onScroll?.(e);
+            }}
+          >
+            {children}
+          </ScrollView>
+        </SnapSheetScrollContext.Provider>
       </View>
     </Animated.View>
   );

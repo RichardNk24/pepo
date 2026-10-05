@@ -19,14 +19,9 @@ build({
   .then(() => {
     fs.cpSync("apps/api/src/admin", "apps/api/dist/admin", { recursive: true });
     fs.mkdirSync("apps/api/dist/map-assets", { recursive: true });
-    fs.cpSync(
-      "packages/maps/assets/vehicles/car-top.png",
-      "apps/api/dist/map-assets/car-top.png",
-    );
-    fs.cpSync(
-      "packages/maps/assets/vehicles/moto-top.png",
-      "apps/api/dist/map-assets/moto-top.png",
-    );
+    fs.cpSync("packages/maps/assets/vehicles", "apps/api/dist/map-assets", {
+      recursive: true,
+    });
     console.log("API built with shared pure packages and map assets.");
   })
   .catch((e) => {

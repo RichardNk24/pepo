@@ -1,4 +1,13 @@
-import type { CityId, Place, Point, Route } from "@pepo/types/model";
+import type {
+  CityId,
+  PersonalPlaceSuggestions,
+  Place,
+  PlacePersonalizationPreferences,
+  Point,
+  Route,
+  SavedPlace,
+  SavedPlaceInput,
+} from "@pepo/types/model";
 import { CITIES } from "@pepo/utils/cities";
 import { API_URL, LIVE, api } from "./api";
 
@@ -73,4 +82,35 @@ export const resolveMapRequest = (
     method: "POST",
     body: { query, city, language, allowAi },
     signal,
+  });
+
+/** Private server-ranked destinations and saved places for the current rider. */
+export const getPersonalPlaceSuggestions = (city?: CityId) =>
+  api<PersonalPlaceSuggestions>(
+    `/places/suggestions${city ? `?city=${encodeURIComponent(city)}` : ""}`,
+  );
+
+export const getSavedPlaces = () => api<SavedPlace[]>("/me/saved-places");
+
+/** Use a stable client ID so retries on weak mobile networks are idempotent. */
+export const savePlace = (input: SavedPlaceInput) =>
+  api<SavedPlace>(`/me/saved-places/${encodeURIComponent(input.id)}`, {
+    method: "PUT",
+    body: input,
+  });
+
+export const deleteSavedPlace = (id: string) =>
+  api<void>(`/me/saved-places/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+
+export const getPlacePersonalizationPreferences = () =>
+  api<PlacePersonalizationPreferences>("/me/place-preferences");
+
+export const setPlacePersonalizationPreferences = (
+  preferences: PlacePersonalizationPreferences,
+) =>
+  api<PlacePersonalizationPreferences>("/me/place-preferences", {
+    method: "PUT",
+    body: preferences,
   });

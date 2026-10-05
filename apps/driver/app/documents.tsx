@@ -1,7 +1,7 @@
 import { C } from "@pepo/config/tokens";
 import { formatDate } from "@pepo/i18n/locale";
 import { useApp } from "@pepo/session/AppProvider";
-import type { DocumentKind, VehicleKind } from "@pepo/types/model";
+import type { ActiveVehicleKind, DocumentKind } from "@pepo/types/model";
 import { Button, Field, Header, s, Screen, Tag, Txt } from "@pepo/ui/UI";
 import { VEHICLES } from "@pepo/utils/cities";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
@@ -53,8 +53,10 @@ export default function Documents() {
   const app = useApp();
   const [model, setModel] = useState(app.profile?.driver?.model || ""),
     [plate, setPlate] = useState(app.profile?.driver?.plate || ""),
-    [vehicle, setVehicle] = useState<VehicleKind>(
-      app.profile?.driver?.vehicle || "moto",
+    [vehicle, setVehicle] = useState<ActiveVehicleKind>(() =>
+      VEHICLES.some((v) => v.id === app.profile?.driver?.vehicle)
+        ? (app.profile?.driver?.vehicle as ActiveVehicleKind)
+        : "moto",
     );
   const driver = app.profile?.role === "driver";
   const status = driver
@@ -67,7 +69,11 @@ export default function Documents() {
     if (app.profile) {
       setModel(app.profile.driver?.model || "");
       setPlate(app.profile.driver?.plate || "");
-      setVehicle(app.profile.driver?.vehicle || "moto");
+      setVehicle(
+        VEHICLES.some((v) => v.id === app.profile?.driver?.vehicle)
+          ? (app.profile.driver?.vehicle as ActiveVehicleKind)
+          : "moto",
+      );
     }
   }, [app.profile?.id]);
   const upload = async (kind: DocumentKind, camera = false) => {
@@ -181,7 +187,7 @@ export default function Documents() {
                       vehicle,
                       model: model.trim(),
                       plate: plate.trim(),
-                      helmet: ["moto", "comfort"].includes(vehicle),
+                      helmet: ["moto", "motoSend"].includes(vehicle),
                     },
                   })
                 }

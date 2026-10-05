@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "e73063fe-e87e-4dbe-bec4-505e0789b909"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.richardnk24.pepomonorepo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { z } from "zod";
 import type { Store } from "./database";
+import { sendTripActivityUpdate } from "./live-activities/apns";
 
 export type ServerConfig = {
   devAuth: boolean;
@@ -56,10 +57,9 @@ export const place = point.extend({
 });
 export const vehicle = z.enum([
   "moto",
-  "comfort",
+  "motoSend",
   "taxi",
   "suv",
-  "fourByFour",
   "minibus",
   "tricycle",
   "truck",
@@ -72,6 +72,35 @@ export const driverSchema = z.object({
   plate: z.string().min(4).max(25),
   helmet: z.boolean(),
 });
+
+export function isLocalExpoWebOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    if (
+      url.protocol !== "http:" ||
+      !/^8\d{3}$/.test(url.port) ||
+      Number(url.port) < 8081 ||
+      Number(url.port) > 8090
+    )
+      return false;
+
+    const octets = url.hostname.split(".").map(Number);
+    if (
+      octets.length !== 4 ||
+      octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)
+    )
+      return false;
+
+    return (
+      octets[0] === 10 ||
+      (octets[0] === 192 && octets[1] === 168) ||
+      (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export type AuthRequest = Request & { actor: Profile; tokenHash: string };
 export const wrap =
   (f: (req: AuthRequest, res: Response) => unknown) =>
@@ -98,7 +127,13 @@ export function createRuntime(store: Store, config: ServerConfig) {
   app.use(
     cors({
       origin: (origin, cb) =>
-        cb(null, !origin || config.corsOrigins.includes(origin)),
+        cb(
+          null,
+          !origin ||
+            config.corsOrigins.includes(origin) ||
+            (process.env.NODE_ENV !== "production" &&
+              isLocalExpoWebOrigin(origin)),
+        ),
     }),
   );
   app.use(express.json({ limit: "100kb" }));
@@ -123,6 +158,7 @@ export function createRuntime(store: Store, config: ServerConfig) {
   let onChange: (trip: Trip) => void = () => {};
   const notify = (t: Trip) => {
     onChange(t);
+    sendTripActivityUpdate(store.db, t);
     return t;
   };
   const publicDriver = (p: Profile): PublicDriver => ({

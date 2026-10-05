@@ -44,6 +44,41 @@ export function register_trips(ctx: RouteContext) {
       res.json(result.map((t) => visibleTrip(t, req.actor)));
     }),
   );
+  app.put(
+    "/api/trips/:id/live-activity-token",
+    wrap((req, res) => {
+      if (req.actor.role !== "passenger")
+        throw new ApiError(403, "Seul le passager peut activer le suivi de sa course.");
+      const trip = requiredTrip(String(req.params.id));
+      if (trip.riderId !== req.actor.id)
+        throw new ApiError(403, "Cette course ne vous appartient pas.");
+      if (!["searching", "accepted", "arrived", "in_progress"].includes(trip.status))
+        throw new ApiError(409, "Le suivi de cette course n’est plus actif.");
+      const input = z.object({
+        activityId: z.string().min(1).max(120).regex(/^[a-zA-Z0-9_.:-]+$/),
+        pushToken: z.string().min(32).max(512).regex(/^[a-fA-F0-9]+$/),
+        language: z.enum(["fr", "en", "sw", "ln"]),
+      }).strict().parse(req.body);
+      store.db.prepare(
+        `INSERT INTO live_activity_tokens(tripId,riderId,activityId,pushToken,language,updatedAt)
+         VALUES(?,?,?,?,?,?)
+         ON CONFLICT(tripId,activityId) DO UPDATE SET riderId=excluded.riderId,pushToken=excluded.pushToken,language=excluded.language,updatedAt=excluded.updatedAt`,
+      ).run(trip.id, req.actor.id, input.activityId, input.pushToken, input.language, Date.now());
+      res.status(204).end();
+    }),
+  );
+  app.delete(
+    "/api/trips/:id/live-activity-token/:activityId",
+    wrap((req, res) => {
+      const trip = requiredTrip(String(req.params.id));
+      if (trip.riderId !== req.actor.id || req.actor.role !== "passenger")
+        throw new ApiError(403, "Cette course ne vous appartient pas.");
+      store.db.prepare(
+        "DELETE FROM live_activity_tokens WHERE tripId=? AND riderId=? AND activityId=?",
+      ).run(trip.id, req.actor.id, String(req.params.activityId));
+      res.status(204).end();
+    }),
+  );
   app.post(
     "/api/trips",
     wrap(async (req, res) => {

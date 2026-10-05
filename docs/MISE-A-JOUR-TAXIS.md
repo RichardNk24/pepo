@@ -6,7 +6,7 @@ Extraire l’archive dans un dossier séparé. Copier les dossiers `app`, `src` 
 
 ## Carte inaccessible dans Expo Go
 
-Un `/health` accessible ne garantit pas que `/maps/mobile` charge. Ouvrir sur l’iPhone `http://192.168.11.102:4000/maps/mobile`. Comparer avec l’adresse désormais affichée par Pepo en cas d’erreur. Vérifier dans le `.env` à la racine : `EXPO_PUBLIC_MAPS_API_URL=http://192.168.11.102:4000`. Utiliser l’IP réelle du PC si elle a changé. Si Safari affiche la carte à la même adresse mais pas Expo Go, vérifier l’autorisation Réseau local d’Expo Go sur l’iPhone. Le bouton Réessayer recrée la WebView, sans cache. La cause sur le téléphone reste à confirmer ; aucun accès à son réseau n’a été possible depuis l’environnement de développement.
+Un `/health` accessible ne garantit pas que `/maps/mobile` charge. Ouvrir sur l’iPhone `http://192.168.11.104:4000/maps/mobile`. Comparer avec l’adresse désormais affichée par Pepo en cas d’erreur. Vérifier dans le `.env` à la racine : `EXPO_PUBLIC_MAPS_API_URL=http://192.168.11.104:4000`. Utiliser l’IP réelle du PC si elle a changé. Si Safari affiche la carte à la même adresse mais pas Expo Go, vérifier l’autorisation Réseau local d’Expo Go sur l’iPhone. Le bouton Réessayer recrée la WebView, sans cache. La cause sur le téléphone reste à confirmer ; aucun accès à son réseau n’a été possible depuis l’environnement de développement.
 
 Redémarrer le serveur :
 

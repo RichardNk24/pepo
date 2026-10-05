@@ -19,4 +19,7 @@ export const VEHICLE_METRICS = {
     displayHeight: 32,
   },
 };
-export type VehicleImageUrls = { taxi: string; moto: string };
+export type VehicleImageUrls = Record<
+  import("@pepo/types/model").VehicleKind,
+  string
+>;

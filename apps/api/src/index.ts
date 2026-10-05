@@ -73,6 +73,7 @@ const cleanup = setInterval(() => {
   store.db.prepare("DELETE FROM sessions WHERE expiresAt<?").run(Date.now());
   store.db.prepare("DELETE FROM otp WHERE expiresAt<?").run(Date.now());
   store.db.prepare("DELETE FROM shares WHERE expiresAt<?").run(Date.now());
+  store.db.prepare("DELETE FROM live_activity_tokens WHERE updatedAt<?").run(Date.now() - 48 * 60 * 60 * 1000);
 }, 3600000);
 const dispatch = () => {
   try {

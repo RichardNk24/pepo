@@ -1,14 +1,17 @@
-import { GOOGLE_MAP_URL,GOOGLE_WEB_KEY } from "@pepo/api-client/maps";
+import { GOOGLE_MAP_URL, GOOGLE_WEB_KEY } from "@pepo/api-client/maps";
 import { C } from "@pepo/config/tokens";
 import { useI18n } from "@pepo/i18n/Context";
-import { Button,Txt } from "@pepo/ui/UI";
+import { Button, Txt } from "@pepo/ui/UI";
 import { validPoint } from "@pepo/utils/mapGeometry";
 import { Asset } from "expo-asset";
-import { useEffect,useMemo,useRef,useState } from "react";
-import { StyleSheet,View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import type { ActiveVehicleKind } from "@pepo/types/model";
 import { DemoMap } from "./DemoMap";
 import type { MapProps } from "./MapTypes";
 import { googleMapDocument } from "./googleDocument";
+import type { VehicleImageUrls } from "./vehicleMetrics";
+import { MAP_VEHICLE_IMAGES } from "./mapVehicleCatalog.generated";
 import { useMapMotion } from "./useMapMotion";
 
 export default function MapBoard(props: MapProps) {
@@ -25,17 +28,30 @@ export default function MapBoard(props: MapProps) {
   const [error, setError] = useState(""),
     [revision, setRevision] = useState(0),
     [ready, setReady] = useState(false);
+  const localVehicleImages = useMemo(() => {
+    const uri = (kind: ActiveVehicleKind) => {
+      const source = MAP_VEHICLE_IMAGES[kind] || MAP_VEHICLE_IMAGES.moto;
+      return Asset.fromModule(source as number).uri;
+    };
+    return {
+      moto: uri("moto"),
+      motoSend: uri("motoSend"),
+      taxi: uri("taxi"),
+      suv: uri("suv"),
+      minibus: uri("minibus"),
+      tricycle: uri("tricycle"),
+      truck: uri("truck"),
+      pickupTruck: uri("pickupTruck"),
+      comfort: uri("moto"),
+      fourByFour: uri("suv"),
+    } satisfies VehicleImageUrls;
+  }, []);
   const html = useMemo(
     () =>
       !GOOGLE_MAP_URL && GOOGLE_WEB_KEY
-        ? googleMapDocument(GOOGLE_WEB_KEY, "", {
-            taxi: Asset.fromModule(require("../assets/vehicles/car-top.png"))
-              .uri,
-            moto: Asset.fromModule(require("../assets/vehicles/moto-top.png"))
-              .uri,
-          })
+        ? googleMapDocument(GOOGLE_WEB_KEY, "", localVehicleImages)
         : undefined,
-    [],
+    [localVehicleImages],
   );
   const update = () =>
     ref.current?.contentWindow?.postMessage(

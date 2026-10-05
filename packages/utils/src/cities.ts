@@ -1,8 +1,8 @@
 import type {
-CityId,
-Place,
-PublicDriver,
-VehicleKind,
+  CityId,
+  Place,
+  PublicDriver,
+  ActiveVehicleKind,
 } from "@pepo/types/model";
 export const CITIES: Record<
   CityId,
@@ -138,16 +138,16 @@ export const PLACES: Place[] = [
   place("c-3", "Aéroport de Kolwezi", "Kolwezi", "kolwezi", -10.7659, 25.5057),
 ];
 export const VEHICLES: {
-  id: VehicleKind;
+  id: ActiveVehicleKind;
   name: string;
   detail: string;
   seats: number;
 }[] = [
   { id: "moto", name: "Pepo", detail: "Simple. Rapide. Local.", seats: 1 },
   {
-    id: "comfort",
-    name: "Moto Confort",
-    detail: "Un peu plus de confort.",
+    id: "motoSend",
+    name: "Pepo Send",
+    detail: "Moto avec un espace pour vos colis.",
     seats: 1,
   },
   { id: "taxi", name: "Taxi", detail: "De la place pour vous.", seats: 4 },
@@ -155,12 +155,6 @@ export const VEHICLES: {
     id: "suv",
     name: "SUV",
     detail: "Plus d’espace pour vos déplacements.",
-    seats: 4,
-  },
-  {
-    id: "fourByFour",
-    name: "4×4",
-    detail: "Un véhicule tout-terrain, 4 places.",
     seats: 4,
   },
   {

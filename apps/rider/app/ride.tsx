@@ -5,7 +5,13 @@ import MapBoard from "@pepo/maps/MapBoard";
 import { VehicleArt } from "@pepo/maps/VehicleArt";
 import { useApp } from "@pepo/session/AppProvider";
 import { useLocation } from "@pepo/session/LocationProvider";
-import type { Offer, Place, Route, VehicleKind } from "@pepo/types/model";
+import type {
+  ActiveVehicleKind,
+  Offer,
+  Place,
+  Route,
+  VehicleKind,
+} from "@pepo/types/model";
 import {
   Avatar,
   Button,
@@ -41,7 +47,7 @@ import {
   UserRound,
   X,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -64,7 +70,7 @@ import { RouteSummary } from "../src/components/RouteSummary";
 import { SchedulePicker } from "../src/components/SchedulePicker";
 import { SnapSheet } from "../src/components/SnapSheet";
 import { VehicleOptions } from "../src/components/VehicleOptions";
-import { sheetGeometry } from "../src/domain/rideLayout";
+import { sheetGeometry, vehicleOptionsDensity } from "../src/domain/rideLayout";
 function fromParam(
   value: string | string[] | undefined,
   fallback: Place,
@@ -90,11 +96,13 @@ export default function Ride() {
       id?: string;
       pickup?: string;
       destination?: string;
-      vehicle?: VehicleKind;
+      vehicle?: string;
       schedule?: string;
     }>();
   const location = useLocation();
   const [sheetHeight, setSheetHeight] = useState(340);
+  const [sheetSnapIndex, setSheetSnapIndex] = useState(2);
+  const sheetInteraction = useRef(false);
   const [viewportHeight, setViewportHeight] = useState(700);
   const [headerHeight, setHeaderHeight] = useState(48);
   const [sheetMoving, setSheetMoving] = useState(false);
@@ -120,14 +128,19 @@ export default function Ride() {
     [overview, setOverview] = useState(0),
     [routeRevision, setRouteRevision] = useState(0);
   const places = PLACES.filter((p) => p.city === app.settings.city);
+  // Development-only map preview so local API sessions can verify vehicle
+  // marker artwork before the live nearby-driver feed is implemented.
+  const showMapDemoFleet =
+    app.demo ||
+    (__DEV__ && process.env.EXPO_PUBLIC_MAP_DEMO_FLEET === "true");
   const [pickup, setPickup] = useState(() =>
     fromParam(params.pickup, places[0]),
   );
   const [destination, setDestination] = useState(() =>
     fromParam(params.destination, places[2] || places[1]),
   );
-  const [vehicle, setVehicle] = useState<VehicleKind>(
-    VEHICLES.some((v) => v.id === params.vehicle) ? params.vehicle! : "moto",
+  const [vehicle, setVehicle] = useState<ActiveVehicleKind>(
+    VEHICLES.find((v) => v.id === params.vehicle)?.id || "moto",
   );
   const [route, setRoute] = useState<Route>(estimateRoute(pickup, destination));
   const [rawRouteBusy, setRouteBusy] = useState(true),
@@ -159,10 +172,17 @@ export default function Ride() {
   const choosing = !trip;
   const nearbyVehicles = useMemo(
     () =>
-      app.demo && (choosing || trip?.status === "searching")
-        ? demoFleet(pickup)
+      showMapDemoFleet && (choosing || trip?.status === "searching")
+        ? demoFleet(pickup, vehicle)
         : [],
-    [app.demo, choosing, trip?.status, pickup.latitude, pickup.longitude],
+    [
+      showMapDemoFleet,
+      choosing,
+      trip?.status,
+      pickup.latitude,
+      pickup.longitude,
+      vehicle,
+    ],
   );
   useEffect(() => {
     if (!choosing) return;
@@ -427,8 +447,24 @@ export default function Ride() {
           bottom={footerHeight}
           topInset={sheetTop}
           containerHeight={viewportHeight}
-          onMoving={setSheetMoving}
-          onHeight={setSheetHeight}
+          onMoving={(moving) => {
+            setSheetMoving(moving);
+            if (moving) sheetInteraction.current = true;
+            else sheetInteraction.current = false;
+          }}
+          onHeight={(height) => {
+            setSheetHeight(height);
+            if (!sheetInteraction.current) return;
+            const nextIndex = sheetLayout.snaps.reduce(
+              (best, snap, index) =>
+                Math.abs(snap - height) <
+                Math.abs(sheetLayout.snaps[best] - height)
+                  ? index
+                  : best,
+              0,
+            );
+            setSheetSnapIndex(nextIndex);
+          }}
           style={r.sheet}
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
@@ -459,6 +495,7 @@ export default function Ride() {
                 onChange={setVehicle}
                 distanceKm={route.distanceKm}
                 priceReady={!routeBusy && !routeError}
+                density={vehicleOptionsDensity(sheetSnapIndex)}
               />
               {routeError && (
                 <View style={{ gap: 10, marginVertical: 12 }}>

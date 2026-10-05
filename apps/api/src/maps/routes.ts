@@ -6,6 +6,11 @@ import { z } from "zod";
 import { computeRoute, reversePlace, searchPlaces } from "../maps";
 
 import { googleMapDocument } from "@pepo/maps/googleDocument";
+import {
+  LEGACY_MAP_ASSETS,
+  VEHICLE_MAP_ASSET_CANDIDATES,
+} from "@pepo/maps/vehicleMapAssets";
+import type { VehicleKind } from "@pepo/types/model";
 
 import {
   ApiError,
@@ -15,20 +20,37 @@ import {
   wrap,
   type RouteContext,
 } from "../runtime";
+function mapAssetsDir() {
+  if (process.env.PEPO_MAP_ASSETS_DIR)
+    return resolve(process.env.PEPO_MAP_ASSETS_DIR);
+  const candidates = [
+    resolve("packages/maps/assets/vehicles"),
+    resolve("../../packages/maps/assets/vehicles"),
+    resolve("apps/api/dist/map-assets"),
+    resolve("dist/map-assets"),
+  ];
+  return candidates.find((candidate) => existsSync(candidate)) || candidates[0];
+}
 export function register_maps(ctx: RouteContext) {
   const { validateMapArea, app, store, config } = ctx;
   app.get("/maps/assets/:name", (req, res) => {
     const name = req.params.name;
-    if (name !== "car-top.png" && name !== "moto-top.png")
-      return res.sendStatus(404);
-    res.setHeader("Cache-Control", "no-cache");
-    return res.sendFile(
-      resolve(
-        process.env.PEPO_MAP_ASSETS_DIR ||
-          "../../packages/maps/assets/vehicles",
-        name,
-      ),
+    const assetRoot = mapAssetsDir();
+    if (
+      LEGACY_MAP_ASSETS.includes(name as (typeof LEGACY_MAP_ASSETS)[number])
+    ) {
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      return res.sendFile(resolve(assetRoot, name));
+    }
+    const candidates = Object.hasOwn(VEHICLE_MAP_ASSET_CANDIDATES, name)
+      ? VEHICLE_MAP_ASSET_CANDIDATES[name as VehicleKind]
+      : undefined;
+    const relative = candidates?.find((candidate) =>
+      existsSync(resolve(assetRoot, candidate)),
     );
+    if (!relative) return res.sendStatus(404);
+    res.setHeader("Cache-Control", "no-cache");
+    return res.sendFile(resolve(assetRoot, relative));
   });
   app.get("/maps/mobile", (_req, res) => {
     if (!config.googleWebKey)
@@ -53,21 +75,24 @@ export function register_maps(ctx: RouteContext) {
     );
     res.setHeader("Cache-Control", "no-store");
     res.removeHeader("X-Frame-Options");
-    const assetUrl = (name: string) => {
-      const path = resolve(
-        process.env.PEPO_MAP_ASSETS_DIR ||
-          "../../packages/maps/assets/vehicles",
-        name,
+    const assetUrl = (kind: VehicleKind) => {
+      const root = mapAssetsDir();
+      const relative = VEHICLE_MAP_ASSET_CANDIDATES[kind].find((candidate) =>
+        existsSync(resolve(root, candidate)),
       );
-      const version = existsSync(path) ? statSync(path).mtimeMs : 0;
-      return `/maps/assets/${name}?v=${version}`;
+      const path = relative ? resolve(root, relative) : "";
+      const version = path && existsSync(path) ? statSync(path).mtimeMs : 0;
+      return `/maps/assets/${kind}?v=${version}`;
     };
-    res.type("html").send(
-      googleMapDocument(config.googleWebKey, nonce, {
-        taxi: assetUrl("car-top.png"),
-        moto: assetUrl("moto-top.png"),
-      }),
-    );
+    const images = Object.fromEntries(
+      Object.keys(VEHICLE_MAP_ASSET_CANDIDATES).map((kind) => [
+        kind,
+        assetUrl(kind as VehicleKind),
+      ]),
+    ) as Record<VehicleKind, string>;
+    res
+      .type("html")
+      .send(googleMapDocument(config.googleWebKey, nonce, images));
   });
   app.get("/api/maps/config", (_req, res) =>
     res.json({

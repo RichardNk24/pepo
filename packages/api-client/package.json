@@ -5,6 +5,7 @@
   "exports": {
     "./api": "./src/api.ts",
     "./maps": "./src/maps.ts",
+    "./live-activities": "./src/live-activities.ts",
     "./client": "./src/client.ts"
   },
   "dependencies": {

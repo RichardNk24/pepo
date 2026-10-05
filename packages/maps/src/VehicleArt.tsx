@@ -1,13 +1,13 @@
 import { C } from "@pepo/config/tokens";
 import type { VehicleKind } from "@pepo/types/model";
 import { Image } from "react-native";
-import Svg,{
-Circle,
-Ellipse,
-G,
-Path,
-Rect,
-Image as SvgImage,
+import Svg, {
+  Circle,
+  Ellipse,
+  G,
+  Path,
+  Rect,
+  Image as SvgImage,
 } from "react-native-svg";
 import { MapVehicle } from "./MapVehicle";
 import { VEHICLE_IMAGES } from "./vehicleCatalog.generated";
@@ -15,6 +15,12 @@ export { VEHICLE_IMAGES } from "./vehicleCatalog.generated";
 
 const CATALOG_FRAMES = {
   moto: {
+    width: 339,
+    height: 735,
+    viewBox: "0 182 339 339",
+  },
+
+  motoSend: {
     width: 339,
     height: 735,
     viewBox: "0 182 339 339",
@@ -80,7 +86,12 @@ export function VehicleArt({
   top?: boolean;
 }) {
   if (top) return <MapVehicle kind={kind} width={width} />;
-  const source = VEHICLE_IMAGES[kind];
+  const source =
+    kind === "comfort"
+      ? VEHICLE_IMAGES.moto
+      : kind === "fourByFour"
+        ? VEHICLE_IMAGES.suv
+        : VEHICLE_IMAGES[kind];
   const frame = CATALOG_FRAMES[kind as keyof typeof CATALOG_FRAMES];
 
   if (source && frame) {

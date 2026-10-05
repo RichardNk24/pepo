@@ -13,6 +13,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: "app.pepo.mobility",
     supportsTablet: false,
     infoPlist: {
+      NSSupportsLiveActivities: true,
       NSLocationWhenInUseUsageDescription:
         "Pepo utilise votre position pour trouver votre point de départ et suivre votre course quand l’application est ouverte.",
     },
@@ -54,6 +55,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-secure-store",
     "expo-font",
     "expo-status-bar",
+    ["expo-widgets", { enablePushNotifications: true }],
     [
       "expo-splash-screen",
       {

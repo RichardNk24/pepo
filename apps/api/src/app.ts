@@ -27,6 +27,7 @@ import { register_drivers } from "./drivers/routes";
 import { register_voice } from "./voice/routes";
 import { register_map_search } from "./map-search/routes";
 import { register_maps } from "./maps/routes";
+import { register_personalized_places } from "./personalization/places";
 import { ApiError, createRuntime, type ServerConfig } from "./runtime";
 import { register_support } from "./support/routes";
 import { register_trips } from "./trips/routes";
@@ -78,6 +79,7 @@ export function createApp(store: Store, config: ServerConfig) {
   register_documents(ctx);
   register_drivers(ctx);
   register_map_search(ctx);
+  register_personalized_places(ctx);
   register_voice(ctx);
   register_trips(ctx);
   register_support(ctx);

@@ -1,9 +1,21 @@
 import { LIVE } from "@pepo/api-client/api";
-import { resolveMapRequest, reverseMapPlace } from "@pepo/api-client/maps";
+import {
+  deleteSavedPlace,
+  getPersonalPlaceSuggestions,
+  resolveMapRequest,
+  reverseMapPlace,
+  savePlace,
+  setPlacePersonalizationPreferences,
+} from "@pepo/api-client/maps";
 import { C } from "@pepo/config/tokens";
 import { useApp } from "@pepo/session/AppProvider";
 import { useLocation } from "@pepo/session/LocationProvider";
-import type { Place } from "@pepo/types/model";
+import type {
+  Place,
+  SavedPlaceCategory,
+  SavedPlace,
+  PersonalPlaceSuggestions,
+} from "@pepo/types/model";
 import { IconButton, Screen, Txt, s } from "@pepo/ui/UI";
 import { CITIES, PLACES } from "@pepo/utils/cities";
 import {
@@ -15,14 +27,19 @@ import type { CapturePhase } from "./voiceCapture";
 import { DestinationVoiceButton } from "./DestinationVoiceButton";
 import {
   ArrowUpRight,
+  Bookmark,
+  BookmarkCheck,
   MapPin,
   Navigation,
   Search,
+  Trash2,
   X,
 } from "lucide-react-native";
+import * as Crypto from "expo-crypto";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -73,6 +90,12 @@ export function PlaceSearch({
     message: "",
   });
   const [places, setPlaces] = useState<Place[]>([]);
+  const [personalPlaces, setPersonalPlaces] =
+    useState<PersonalPlaceSuggestions | null>(null);
+  const [personalLoading, setPersonalLoading] = useState(false);
+  const [personalError, setPersonalError] = useState(false);
+  const [saveCandidate, setSaveCandidate] = useState<Place | null>(null);
+  const [savingPlace, setSavingPlace] = useState(false);
   const [loading, setLoading] = useState(false),
     [error, setError] = useState("");
   const requestVersion = useRef(0);
@@ -93,8 +116,37 @@ export function PlaceSearch({
       setQuery("");
       setPlaces([]);
       setError("");
+      setPersonalPlaces(null);
+      setPersonalError(false);
+      setSaveCandidate(null);
     }
   }, [visible, pickup]);
+  const canUsePersonalPlaces =
+    LIVE && !app.demo && app.profile?.role === "passenger";
+  const destinationIsActive = !routeMode || active === "destination";
+  useEffect(() => {
+    if (
+      !visible ||
+      mapPicking ||
+      query.trim() ||
+      !destinationIsActive ||
+      !canUsePersonalPlaces
+    ) return;
+    let disposed = false;
+    setPersonalLoading(true);
+    setPersonalError(false);
+    getPersonalPlaceSuggestions(app.settings.city)
+      .then((data) => {
+        if (!disposed) setPersonalPlaces(data);
+      })
+      .catch(() => {
+        if (!disposed) setPersonalError(true);
+      })
+      .finally(() => {
+        if (!disposed) setPersonalLoading(false);
+      });
+    return () => { disposed = true; };
+  }, [visible, mapPicking, query, destinationIsActive, canUsePersonalPlaces, app.settings.city]);
   useEffect(() => {
     if (!visible || mapPicking) return;
     const timer = setTimeout(() => {
@@ -239,6 +291,67 @@ export function PlaceSearch({
     setPlaces([]);
     setError("");
   };
+  const savePlaceInCategory = async (category: SavedPlaceCategory) => {
+    if (!saveCandidate) return;
+    setSavingPlace(true);
+    try {
+      const saved = await savePlace({
+        id: `saved-${Crypto.randomUUID()}`,
+        category,
+        label: saveCandidate.name.slice(0, 60),
+        place: saveCandidate,
+      });
+      setPersonalPlaces((current) => current ? {
+        ...current,
+        savedPlaces: [saved, ...current.savedPlaces.filter((item) => item.id !== saved.id)],
+      } : current);
+      setSaveCandidate(null);
+    } catch (e) {
+      setError((e as Error).message);
+      setSaveCandidate(null);
+    } finally {
+      setSavingPlace(false);
+    }
+  };
+  const removeSavedPlace = (saved: SavedPlace) => {
+    void deleteSavedPlace(saved.id).then(() => {
+      setPersonalPlaces((current) => current ? {
+        ...current,
+        savedPlaces: current.savedPlaces.filter((item) => item.id !== saved.id),
+      } : current);
+    }).catch((e) => setError((e as Error).message));
+  };
+  const togglePersonalization = async () => {
+    if (!personalPlaces) return;
+    const enabled = !personalPlaces.personalizationEnabled;
+    try {
+      const preferences = await setPlacePersonalizationPreferences({
+        personalizedSuggestions: enabled,
+      });
+      setPersonalPlaces((current) => current ? {
+        ...current,
+        personalizationEnabled: preferences.personalizedSuggestions,
+        suggestions: preferences.personalizedSuggestions ? current.suggestions : [],
+        recent: preferences.personalizedSuggestions ? current.recent : [],
+        completedTripsAnalyzed: preferences.personalizedSuggestions ? current.completedTripsAnalyzed : 0,
+      } : current);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+  const savedForPlace = (place: Place) =>
+    personalPlaces?.savedPlaces.find((saved) => saved.place.id === place.id);
+  const categoryOptions: SavedPlaceCategory[] = [
+    "home", "work", "school", "hospital", "favorite",
+  ];
+  const personalPlaceIds = new Set([
+    ...(personalPlaces?.savedPlaces.map((saved) => saved.place.id) || []),
+    ...(personalPlaces?.suggestions.map((item) => item.place.id) || []),
+    ...(personalPlaces?.recent.map((item) => item.place.id) || []),
+  ]);
+  const visiblePlaces = !query.trim() && destinationIsActive
+    ? places.filter((place) => !personalPlaceIds.has(place.id))
+    : places;
   const inputRow = (target: Target) => {
     const isActive = !routeMode || active === target;
     const place = target === "pickup" ? routePickup : routeDestination;
@@ -322,6 +435,7 @@ export function PlaceSearch({
     );
   };
   return (
+    <>
     <Modal
       visible={visible}
       statusBarTranslucent
@@ -456,38 +570,125 @@ export function PlaceSearch({
                 marginTop: 8,
               }}
             >
-              {places.map((p) => (
-                <Pressable
+              {!query.trim() && destinationIsActive && canUsePersonalPlaces && (
+                <View style={{ paddingBottom: 10 }}>
+                  {personalLoading && !personalPlaces && (
+                    <ActivityIndicator style={{ marginVertical: 16 }} color={C.muted} />
+                  )}
+                  {personalError && !personalPlaces && (
+                    <Txt variant="small" color={C.muted} style={{ paddingVertical: 10 }}>
+                      {app.t("personalizationLoadError")}
+                    </Txt>
+                  )}
+                  {!!personalPlaces?.savedPlaces.length && (
+                    <>
+                      <Txt variant="micro" color={C.muted} style={{ paddingTop: 8, paddingBottom: 4 }}>
+                        {app.t("placesSaved")}
+                      </Txt>
+                      {personalPlaces.savedPlaces.map((saved) => (
+                        <View key={`saved-${saved.id}`} style={styles.placeItem}>
+                          <Pressable onPress={() => choose(saved.place)} style={[s.row, { flex: 1, minWidth: 0 }]}>
+                            <View style={styles.placeIcon}><BookmarkCheck size={18} color={C.ink} /></View>
+                            <View style={{ flex: 1 }}>
+                              <Txt variant="label" translate={false}>{saved.label}</Txt>
+                              <Txt variant="small" color={C.muted} translate={false}>{humanAddress(saved.place.address)}</Txt>
+                            </View>
+                            <ArrowUpRight color={C.muted} size={17} />
+                          </Pressable>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`${app.t("placeRemove")}: ${saved.label}`}
+                            hitSlop={8}
+                            style={styles.trailingAction}
+                            onPress={() => Alert.alert(app.t("placeRemove"), saved.label, [
+                              { text: app.t("cancel"), style: "cancel" },
+                              { text: app.t("placeRemove"), style: "destructive", onPress: () => removeSavedPlace(saved) },
+                            ])}
+                          >
+                            <Trash2 size={17} color={C.muted} />
+                          </Pressable>
+                        </View>
+                      ))}
+                    </>
+                  )}
+                  {!!personalPlaces?.personalizationEnabled && !!personalPlaces.suggestions.length && (
+                    <>
+                      <Txt variant="micro" color={C.muted} style={{ paddingTop: 12, paddingBottom: 4 }}>
+                        {app.t("placesForYou")}
+                      </Txt>
+                      {personalPlaces.suggestions.map(({ place }) => (
+                        <Pressable key={`suggestion-${place.id}`} onPress={() => choose(place)} style={styles.placeItem}>
+                          <View style={styles.placeIcon}><MapPin size={18} color={C.ink} /></View>
+                          <View style={{ flex: 1 }}>
+                            <Txt variant="label" translate={false}>{place.name}</Txt>
+                            <Txt variant="small" color={C.muted} translate={false}>{humanAddress(place.address)}</Txt>
+                          </View>
+                          <ArrowUpRight color={C.muted} size={17} />
+                        </Pressable>
+                      ))}
+                    </>
+                  )}
+                  {!!personalPlaces?.personalizationEnabled && !!personalPlaces.recent.length && (
+                    <>
+                      <Txt variant="micro" color={C.muted} style={{ paddingTop: 12, paddingBottom: 4 }}>
+                        {app.t("placesRecent")}
+                      </Txt>
+                      {personalPlaces.recent
+                        .filter((recent) => !personalPlaces.suggestions.some((item) => item.place.id === recent.place.id))
+                        .map(({ place }) => (
+                          <Pressable key={`recent-${place.id}`} onPress={() => choose(place)} style={styles.placeItem}>
+                            <View style={styles.placeIcon}><MapPin size={18} color={C.ink} /></View>
+                            <View style={{ flex: 1 }}>
+                              <Txt variant="label" translate={false}>{place.name}</Txt>
+                              <Txt variant="small" color={C.muted} translate={false}>{humanAddress(place.address)}</Txt>
+                            </View>
+                            <ArrowUpRight color={C.muted} size={17} />
+                          </Pressable>
+                        ))}
+                    </>
+                  )}
+                  {!!personalPlaces && (
+                    <Pressable
+                      accessibilityRole="switch"
+                      accessibilityState={{ checked: personalPlaces.personalizationEnabled }}
+                      onPress={() => void togglePersonalization()}
+                      style={styles.preferenceRow}
+                    >
+                      <Txt variant="small" style={{ flex: 1 }}>{app.t("personalizationOn")}</Txt>
+                      <View style={[styles.preferencePill, personalPlaces.personalizationEnabled && styles.preferencePillOn]}>
+                        <Txt variant="micro" color={personalPlaces.personalizationEnabled ? C.ink : C.muted}>
+                          {personalPlaces.personalizationEnabled ? app.t("personalizationEnabled") : app.t("personalizationOff")}
+                        </Txt>
+                      </View>
+                    </Pressable>
+                  )}
+                </View>
+              )}
+              {visiblePlaces.map((p) => (
+                <View
                   key={p.id}
-                  onPress={() => choose(p)}
-                  style={[
-                    s.row,
-                    {
-                      paddingVertical: 16,
-                      borderBottomWidth: 1,
-                      borderBottomColor: C.line,
-                    },
-                  ]}
+                  style={styles.placeItem}
                 >
-                  <View
-                    style={{
-                      padding: 11,
-                      backgroundColor: C.background,
-                      borderRadius: 14,
-                    }}
-                  >
-                    <MapPin size={18} color={C.ink} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Txt variant="label" translate={false}>
-                      {p.name}
-                    </Txt>
-                    <Txt variant="small" color={C.muted} translate={false}>
-                      {humanAddress(p.address)}
-                    </Txt>
-                  </View>
-                  <ArrowUpRight color={C.muted} size={17} />
-                </Pressable>
+                  <Pressable onPress={() => choose(p)} style={[s.row, { flex: 1, minWidth: 0 }]}>
+                    <View style={styles.placeIcon}><MapPin size={18} color={C.ink} /></View>
+                    <View style={{ flex: 1 }}>
+                      <Txt variant="label" translate={false}>{p.name}</Txt>
+                      <Txt variant="small" color={C.muted} translate={false}>{humanAddress(p.address)}</Txt>
+                    </View>
+                    <ArrowUpRight color={C.muted} size={17} />
+                  </Pressable>
+                  {canUsePersonalPlaces && !savedForPlace(p) && (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={app.t("placeSave")}
+                      hitSlop={8}
+                      style={styles.trailingAction}
+                      onPress={() => setSaveCandidate(p)}
+                    >
+                      <Bookmark size={18} color={C.muted} />
+                    </Pressable>
+                  )}
+                </View>
               ))}
               {!loading && !places.length && !query && (
                 <ActivityIndicator style={{ marginTop: 20 }} color={C.muted} />
@@ -497,7 +698,7 @@ export function PlaceSearch({
                   Aucun lieu trouvé. Essayez un quartier ou une autre adresse.
                 </Txt>
               )}
-              {places.some((p) => p.googleAttribution) && (
+              {visiblePlaces.some((p) => p.googleAttribution) && (
                 <Txt variant="small" color={C.muted} style={{ paddingTop: 20 }}>
                   Google Maps
                 </Txt>
@@ -507,9 +708,54 @@ export function PlaceSearch({
         </Screen>
       )}
     </Modal>
+    <Modal
+      visible={!!saveCandidate}
+      transparent
+      animationType="fade"
+      onRequestClose={() => !savingPlace && setSaveCandidate(null)}
+    >
+      <View style={styles.saveOverlay}>
+        <View style={styles.saveSheet}>
+          <View style={[s.rowBetween, { alignItems: "center" }]}>
+            <View style={{ flex: 1, paddingRight: 12 }}>
+              <Txt variant="h3">{app.t("placeSaveAs")}</Txt>
+              {!!saveCandidate && <Txt variant="small" color={C.muted} translate={false}>{saveCandidate.name}</Txt>}
+            </View>
+            <IconButton icon={X} label={app.t("close")} onPress={() => setSaveCandidate(null)} />
+          </View>
+          {categoryOptions.map((category) => (
+            <Pressable
+              key={category}
+              disabled={savingPlace}
+              onPress={() => void savePlaceInCategory(category)}
+              style={styles.categoryOption}
+            >
+              {savingPlace ? <ActivityIndicator color={C.ink} /> : <Bookmark size={18} color={C.ink} />}
+              <Txt variant="label">{app.t(category === "home" ? "placeHome" : category === "work" ? "placeWork" : category === "school" ? "placeSchool" : category === "hospital" ? "placeHospital" : "placeFavorite")}</Txt>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 const styles = StyleSheet.create({
+  placeItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: C.line,
+    paddingVertical: 12,
+  },
+  placeIcon: { padding: 11, backgroundColor: C.background, borderRadius: 14 },
+  trailingAction: { width: 42, minHeight: 44, alignItems: "center", justifyContent: "center" },
+  preferenceRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.line },
+  preferencePill: { minHeight: 30, paddingHorizontal: 10, justifyContent: "center", borderRadius: 15, backgroundColor: C.background },
+  preferencePillOn: { backgroundColor: C.yellow },
+  saveOverlay: { flex: 1, backgroundColor: "rgba(18, 20, 18, 0.38)", justifyContent: "flex-end" },
+  saveSheet: { backgroundColor: C.paper, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 32, gap: 6 },
+  categoryOption: { minHeight: 52, flexDirection: "row", alignItems: "center", gap: 14, borderBottomWidth: 1, borderBottomColor: C.line },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",

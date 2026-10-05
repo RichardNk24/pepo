@@ -13,6 +13,7 @@
     },
     "./RouteGlow.native": "./src/RouteGlow.native.tsx",
     "./vehicleMetrics": "./src/vehicleMetrics.ts",
+    "./vehicleMapAssets": "./src/vehicleMapAssets.ts",
     "./MapBoard.web": "./src/MapBoard.web.tsx",
     "./MapBoard.native": "./src/MapBoard.native.tsx",
     "./GoogleMap.native": "./src/GoogleMap.native.tsx",

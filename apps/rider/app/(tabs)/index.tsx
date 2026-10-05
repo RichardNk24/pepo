@@ -4,7 +4,7 @@ import { demoFleet } from "@pepo/maps/demoFleet";
 import MapBoard from "@pepo/maps/MapBoard";
 import { useApp } from "@pepo/session/AppProvider";
 import { useLocation } from "@pepo/session/LocationProvider";
-import type { Place, VehicleKind } from "@pepo/types/model";
+import type { ActiveVehicleKind, Place } from "@pepo/types/model";
 import { PepoLogo } from "@pepo/ui/PepoLogo";
 import { Button, s, Tag, Txt, useUI } from "@pepo/ui/UI";
 import { CITIES, PLACES } from "@pepo/utils/cities";
@@ -38,7 +38,12 @@ export default function Home() {
   const [pickup, setPickup] = useState<Place>(cityPlaces[0]);
   const [search, setSearch] = useState<"pickup" | "destination" | null>(null);
   const [planLater, setPlanLater] = useState(false);
-  const [vehicle, setVehicle] = useState<VehicleKind>("moto");
+  const [vehicle, setVehicle] = useState<ActiveVehicleKind>("moto");
+  // Development-only map preview for testing the selected vehicle artwork
+  // while using a local API session.
+  const showMapDemoFleet =
+    app.demo ||
+    (__DEV__ && process.env.EXPO_PUBLIC_MAP_DEMO_FLEET === "true");
   useEffect(() => {
     manualPickup.current = false;
     located.current = false;
@@ -62,8 +67,9 @@ export default function Home() {
   }, [location.fix?.timestamp, app.settings.city]);
   const active = app.activeTrip;
   const nearbyVehicles = useMemo(
-    () => (app.demo && !active ? demoFleet(pickup) : []),
-    [app.demo, !!active, pickup.latitude, pickup.longitude],
+    () =>
+      showMapDemoFleet && !active ? demoFleet(pickup, vehicle) : [],
+    [showMapDemoFleet, !!active, pickup.latitude, pickup.longitude, vehicle],
   );
   const book = (destination: Place) =>
     router.push({

@@ -1,12 +1,12 @@
 import type {
-NewTrip,
-Place,
-Point,
-Profile,
-Route,
-Trip,
-TripStatus,
-VehicleKind,
+  NewTrip,
+  Place,
+  Point,
+  Profile,
+  Route,
+  Trip,
+  TripStatus,
+  VehicleKind,
 } from "@pepo/types/model";
 export class RuleError extends Error {}
 
@@ -51,6 +51,8 @@ export function estimateRoute(a: Point, b: Point): Route {
 export function suggestedFare(km: number, vehicle: VehicleKind) {
   const rates = {
     moto: [1500, 750],
+    motoSend: [2000, 750],
+    // Retained only to display historic rides and stored driver records.
     comfort: [2000, 1000],
     taxi: [3500, 1500],
     suv: [5000, 2000],
@@ -70,7 +72,7 @@ export function canDrive(p: Profile) {
     ["verified", "demo"].includes(p.verification)
   );
 }
-export function validateNewTrip(input: NewTrip) {
+export function validateNewTrip(input: NewTrip | Trip) {
   if (
     (input.stops?.length || 0) > 3 ||
     input.stops?.some(

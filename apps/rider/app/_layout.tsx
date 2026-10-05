@@ -5,6 +5,7 @@ import { DMSans_700Bold } from "@expo-google-fonts/dm-sans/700Bold";
 import { C } from "@pepo/config/tokens";
 import { AppProvider } from "@pepo/session/AppProvider";
 import { LocationProvider } from "@pepo/session/LocationProvider";
+import { LiveRideActivityBridge } from "../src/components/LiveRideActivityBridge";
 import { BrandSplash } from "@pepo/ui/BrandSplash";
 import { Button, Txt, UIProvider } from "@pepo/ui/UI";
 import { useFonts } from "expo-font";
@@ -50,6 +51,7 @@ export default function Layout() {
         <View style={styles.frame}>
           <LocationProvider>
             <AppProvider>
+              <LiveRideActivityBridge />
               <UIProvider>
                 <StatusBar style="dark" />
                 <Stack

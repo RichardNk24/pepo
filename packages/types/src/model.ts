@@ -1,14 +1,26 @@
 export type Role = "passenger" | "driver";
-export type VehicleKind =
+/** Current vehicle options. Retired kinds remain in VehicleKind for old trip history. */
+export type ActiveVehicleKind =
   | "moto"
-  | "comfort"
+  | "motoSend"
   | "taxi"
   | "suv"
-  | "fourByFour"
   | "minibus"
   | "tricycle"
   | "truck"
   | "pickupTruck";
+export type RetiredVehicleKind = "comfort" | "fourByFour";
+export type VehicleKind = ActiveVehicleKind | RetiredVehicleKind;
+export const ACTIVE_VEHICLE_KINDS: ActiveVehicleKind[] = [
+  "moto",
+  "motoSend",
+  "taxi",
+  "suv",
+  "minibus",
+  "tricycle",
+  "truck",
+  "pickupTruck",
+];
 export type CityId = "lubumbashi" | "kinshasa" | "kolwezi";
 export type Language = "fr" | "en" | "sw" | "ln";
 export type Verification =
@@ -31,7 +43,52 @@ export type Place = Point & {
   city: CityId;
   googleAttribution?: boolean;
 };
+export type SavedPlaceCategory =
+  | "home"
+  | "work"
+  | "school"
+  | "hospital"
+  | "favorite"
+  | "custom";
+export type SavedPlace = {
+  /** Client-generated stable ID makes save/update retries idempotent. */
+  id: string;
+  category: SavedPlaceCategory;
+  label: string;
+  note?: string;
+  place: Place;
+  createdAt: number;
+  updatedAt: number;
+};
+export type SavedPlaceInput = Pick<
+  SavedPlace,
+  "id" | "category" | "label" | "place"
+> & { note?: string };
+export type PlaceSuggestionReason = "frequent" | "usual_time";
+export type PlaceSuggestion = {
+  place: Place;
+  visitCount: number;
+  lastVisitedAt: number;
+  reason: PlaceSuggestionReason;
+};
+export type RecentPlace = {
+  place: Place;
+  visitCount: number;
+  lastVisitedAt: number;
+};
+export type PlacePersonalizationPreferences = {
+  personalizedSuggestions: boolean;
+};
+export type PersonalPlaceSuggestions = {
+  savedPlaces: SavedPlace[];
+  suggestions: PlaceSuggestion[];
+  recent: RecentPlace[];
+  completedTripsAnalyzed: number;
+  personalizationEnabled: boolean;
+  generatedAt: number;
+};
 export type DriverDetails = {
+  /** Legacy values can still appear in existing driver records. */
   vehicle: VehicleKind;
   model: string;
   plate: string;
@@ -138,13 +195,12 @@ export type NewTrip = Pick<
   Trip,
   | "pickup"
   | "destination"
-  | "vehicle"
   | "proposedPrice"
   | "route"
   | "guest"
   | "scheduledAt"
   | "stops"
->;
+> & { vehicle: ActiveVehicleKind };
 export type ChatMessage = {
   id: string;
   tripId: string;
