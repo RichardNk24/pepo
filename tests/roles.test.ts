@@ -35,6 +35,7 @@ describe("One identity with independent Rider and Driver sessions", () => {
     dir = mkdtempSync(join(tmpdir(), "pepo-roles-"));
     store = openDatabase(":memory:");
     app = createApp(store, {
+      safety: { enabled: false },
       devAuth: true,
       dataDir: dir,
       publicUrl: "https://pepo.test",

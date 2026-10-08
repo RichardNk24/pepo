@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { wrap, type RouteContext } from "../runtime";
 export function register_drivers(ctx: RouteContext) {
-  const { app, store, visibleTrip, requireDriver } = ctx;
+  const { app, store, visibleTrip, requireDriver, safety } = ctx;
   app.post(
     "/api/me/online",
     wrap((req, res) => {
@@ -26,7 +26,9 @@ export function register_drivers(ctx: RouteContext) {
             req.actor.city,
             req.actor.driver!.vehicle,
           )
-          .filter((t) => t.riderId !== req.actor.id)
+          .filter(
+            (t) => t.riderId !== req.actor.id && safety.eligible(t, req.actor),
+          )
           .map((t) => visibleTrip(t, req.actor)),
       );
     }),

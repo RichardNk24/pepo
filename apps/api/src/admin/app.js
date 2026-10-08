@@ -187,6 +187,7 @@ async function refresh() {
       );
       $("incidents").append(card);
     }
+    await refreshSafety();
     $("login").hidden = true;
     $("workspace").hidden = false;
   } catch (e) {
@@ -207,6 +208,8 @@ $("logout").onclick = () => {
   $("drivers").replaceChildren();
   $("identities").replaceChildren();
   $("incidents").replaceChildren();
+  $("night-drivers").replaceChildren();
+  $("safety-queue").replaceChildren();
   $("workspace").hidden = true;
   $("login").hidden = false;
   $("status").textContent = "";

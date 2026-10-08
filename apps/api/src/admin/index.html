@@ -6,6 +6,7 @@
     <title>Pepo · Administration</title>
     <link rel="stylesheet" href="/admin/style.css" />
     <script src="/admin/app.js" defer></script>
+    <script src="/admin/safety.js" defer></script>
   </head>
   <body>
     <main>
@@ -53,6 +54,22 @@
           votre procédure locale.
         </p>
         <div id="drivers"></div>
+        <h2>Pepo la nuit · Autorisations</h2>
+        <p>
+          Autorisation de 7 jours. Contrôlez la validité des pièces, la
+          correspondance du véhicule et votre procédure de nuit. Un document ou
+          véhicule remplacé impose une nouvelle revue.
+        </p>
+        <div id="night-drivers"></div>
+        <h2>Aide · File opérationnelle</h2>
+        <p>
+          Les demandes sont enregistrées, sans envoi automatique aux secours.
+          Une absence de réponse n’est pas une urgence confirmée. Prenez contact
+          avec chaque personne concernée, puis clôturez. Les 200 plus anciennes
+          demandes de chaque état sont affichées.
+        </p>
+        <button id="safety-refresh" class="secondary">Actualiser l’aide</button>
+        <div id="safety-queue" aria-live="polite"></div>
         <h2>Signalements</h2>
         <p>
           Les signalements sont enregistrés par le serveur. Organisez leur prise

@@ -2,7 +2,19 @@ import { C } from "@pepo/config/tokens";
 import MapBoard from "@pepo/maps/MapBoard";
 import { useApp } from "@pepo/session/AppProvider";
 import { useLocation } from "@pepo/session/LocationProvider";
-import { Button, Field, Header, s, Tag, Txt, useUI } from "@pepo/ui/UI";
+import {
+  IconButton,
+  Button,
+  Field,
+  Header,
+  s,
+  Tag,
+  Txt,
+  useUI,
+} from "@pepo/ui/UI";
+import { TripSafety } from "@pepo/ui/TripSafety";
+import { ShieldCheck } from "lucide-react-native";
+import { safetyText } from "@pepo/i18n/safety";
 import { fare } from "@pepo/utils/rules";
 import { parseVoice, type VoiceAction } from "@pepo/voice/commands";
 import { navigationUrl } from "@pepo/voice/navigation";
@@ -91,6 +103,20 @@ export default function DriverRide() {
         >
           <Header
             back
+            right={
+              ["accepted", "arrived", "in_progress"].includes(trip.status) ? (
+                <IconButton
+                  icon={ShieldCheck}
+                  label={safetyText(app.settings.language, "help")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/ride-safety",
+                      params: { id: trip.id },
+                    })
+                  }
+                />
+              ) : undefined
+            }
             title={app.t(
               trip.status === "completed"
                 ? "completed"
@@ -120,6 +146,14 @@ export default function DriverRide() {
           <Txt variant="h2">{fare(trip.agreedPrice || trip.proposedPrice)}</Txt>
           <Tag>{app.t("cash")}</Tag>
         </View>
+        {["accepted", "arrived", "in_progress"].includes(trip.status) && (
+          <TripSafety
+            tripId={trip.id}
+            demo={app.demo}
+            driver
+            onShare={() => app.shareTrip(trip.id)}
+          />
+        )}
         {app.demo ? <Tag tone="yellow">{app.t("demoOnly")}</Tag> : null}
         {isPickup || trip.status === "in_progress" ? (
           <>

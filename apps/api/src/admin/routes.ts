@@ -10,8 +10,12 @@ export function register_admin(ctx: RouteContext) {
     "/api/admin/drivers",
     wrap((_req, res) => {
       const profiles = (
-        store.db.prepare("SELECT data FROM users").all() as { data: string }[]
-      ).map((r) => JSON.parse(r.data) as Profile);
+        store.db
+          .prepare(
+            "SELECT userId FROM driver_profiles WHERE json_extract(data,'$.verification')='pending'",
+          )
+          .all() as { userId: string }[]
+      ).map((row) => store.user(row.userId, "driver")!);
       res.json(
         profiles.filter(
           (p) => p.role === "driver" && p.verification === "pending",

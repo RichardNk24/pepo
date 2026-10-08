@@ -7,7 +7,7 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 
 import { C } from "@pepo/config/tokens";
 import { VehicleArt } from "@pepo/maps/VehicleArt";
-import type { VehicleKind } from "@pepo/types/model";
+import type { ActiveVehicleKind } from "@pepo/types/model";
 import { Txt } from "@pepo/ui/UI";
 import { VEHICLES } from "@pepo/utils/cities";
 import { fare, suggestedFare } from "@pepo/utils/rules";
@@ -28,13 +28,13 @@ export function VehicleOptions({
   density = "expanded",
   pickupEtaMinutes = {},
 }: {
-  value: VehicleKind;
-  onChange: (kind: VehicleKind) => void;
+  value: ActiveVehicleKind;
+  onChange: (kind: ActiveVehicleKind) => void;
   distanceKm: number;
   priceReady: boolean;
   density?: VehicleOptionsDensity;
   /** Live pickup estimates from dispatch, keyed by vehicle type. */
-  pickupEtaMinutes?: Partial<Record<VehicleKind, number>>;
+  pickupEtaMinutes?: Partial<Record<ActiveVehicleKind, number>>;
 }) {
   const [sort, setSort] = useState<SortMode>("recommended");
   const sheetScroll = useContext(SnapSheetScrollContext);
@@ -98,7 +98,7 @@ export function VehicleOptions({
    * Important :
    * on ne déclenche rien si le véhicule est déjà sélectionné.
    */
-  const selectVehicle = (kind: VehicleKind) => {
+  const selectVehicle = (kind: ActiveVehicleKind) => {
     if (kind === value) {
       return;
     }

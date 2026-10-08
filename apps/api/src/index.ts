@@ -65,19 +65,32 @@ const service = createApp(store, {
   dataDir,
   corsOrigins,
   sendSms,
+  safety: {
+    supportPhone:
+      process.env.SAFETY_SUPPORT_PHONE?.match(/^\+[1-9]\d{7,14}$/)?.[0],
+  },
 });
 const httpServer = createServer(service.app);
-const realtime = attachRealtime(httpServer, store, corsOrigins);
+const realtime = attachRealtime(
+  httpServer,
+  store,
+  corsOrigins,
+  service.safetyDriverEligible,
+);
 service.setOnChange(realtime.publish);
 const cleanup = setInterval(() => {
+  service.safetyCleanup();
   store.db.prepare("DELETE FROM sessions WHERE expiresAt<?").run(Date.now());
   store.db.prepare("DELETE FROM otp WHERE expiresAt<?").run(Date.now());
   store.db.prepare("DELETE FROM shares WHERE expiresAt<?").run(Date.now());
-  store.db.prepare("DELETE FROM live_activity_tokens WHERE updatedAt<?").run(Date.now() - 48 * 60 * 60 * 1000);
+  store.db
+    .prepare("DELETE FROM live_activity_tokens WHERE updatedAt<?")
+    .run(Date.now() - 48 * 60 * 60 * 1000);
 }, 3600000);
 const dispatch = () => {
   try {
     service.dispatchScheduled();
+    service.safetyTick();
   } catch (error) {
     console.error("Programmation Pepo :", (error as Error).message);
   }

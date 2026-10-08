@@ -1,4 +1,5 @@
 import { C } from "@pepo/config/tokens";
+import { safetyText } from "@pepo/i18n/safety";
 import { formatDate } from "@pepo/i18n/locale";
 import { demoFleet } from "@pepo/maps/demoFleet";
 import MapBoard from "@pepo/maps/MapBoard";
@@ -23,6 +24,7 @@ import {
   Txt,
   useUI,
 } from "@pepo/ui/UI";
+import { TripSafety, NightNotice } from "@pepo/ui/TripSafety";
 import { PLACES, VEHICLES } from "@pepo/utils/cities";
 import { arrivalLabel } from "@pepo/utils/mapGeometry";
 import { estimateRoute, fare, suggestedFare } from "@pepo/utils/rules";
@@ -40,7 +42,6 @@ import {
   Phone,
   Plus,
   RotateCcw,
-  Share2,
   ShieldCheck,
   SlidersHorizontal,
   Star,
@@ -131,8 +132,7 @@ export default function Ride() {
   // Development-only map preview so local API sessions can verify vehicle
   // marker artwork before the live nearby-driver feed is implemented.
   const showMapDemoFleet =
-    app.demo ||
-    (__DEV__ && process.env.EXPO_PUBLIC_MAP_DEMO_FLEET === "true");
+    app.demo || (__DEV__ && process.env.EXPO_PUBLIC_MAP_DEMO_FLEET === "true");
   const [pickup, setPickup] = useState(() =>
     fromParam(params.pickup, places[0]),
   );
@@ -415,6 +415,24 @@ export default function Ride() {
                 onPress={() => setStopsOpen(true)}
               />
             )}
+            {trip &&
+              ["accepted", "arrived", "in_progress"].includes(trip.status) && (
+                <IconButton
+                  icon={ShieldCheck}
+                  label={safetyText(app.settings.language, "help")}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    backgroundColor: C.yellowSoft,
+                  }}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/ride-safety",
+                      params: { id: trip.id },
+                    })
+                  }
+                />
+              )}
           </View>
           {showMapControls && (
             <LocationControls
@@ -865,22 +883,11 @@ export default function Ride() {
                 <Tag icon={Banknote}>{app.t("cash")}</Tag>
               </View>
 
-              <Button
-                title={app.t("share")}
-                icon={Share2}
-                kind="secondary"
-                style={{ marginTop: 18 }}
-                onPress={() => app.shareTrip(trip.id)}
+              <TripSafety
+                tripId={trip.id}
+                demo={app.demo}
+                onShare={() => app.shareTrip(trip.id)}
               />
-              <Txt
-                variant="small"
-                color={C.muted}
-                style={{ marginTop: 8, textAlign: "center" }}
-              >
-                {app.demo
-                  ? "Le partage démo ne contient aucun suivi réel."
-                  : "Suivi disponible quand l’application du conducteur est ouverte."}
-              </Txt>
               {app.demo && (
                 <View
                   style={{
@@ -928,7 +935,12 @@ export default function Ride() {
                 kind="secondary"
                 icon={ShieldCheck}
                 style={{ marginTop: 12 }}
-                onPress={() => router.push("/help")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/ride-safety",
+                    params: { id: trip.id },
+                  })
+                }
               />
             </>
           )}
@@ -968,6 +980,7 @@ export default function Ride() {
                 {stops.length ? ` · ${stops.length} étape(s)` : ""}
               </Txt>
             </View>
+            <NightNotice city={app.settings.city} demo={app.demo} compact />
             <View style={[s.row, { gap: 10 }]}>
               <Pressable
                 onPress={() => setOptionsOpen(true)}

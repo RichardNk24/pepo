@@ -50,11 +50,11 @@ export function register_support(ctx: RouteContext) {
           })[c]!,
       );
     const active = ["accepted", "arrived", "in_progress"].includes(t.status);
-    const p = t.driverLocation;
+    const p = t.driverLocationAt ? t.driverLocation : undefined;
     res
       .type("html")
       .send(
-        `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${active ? '<meta http-equiv="refresh" content="15">' : ""}<title>Suivi Pepo</title><body><main><h1>Pepo · Suivi de course</h1><p>${active ? "Course en cours" : "Course terminée ou annulée — suivi désactivé."}</p>${active ? `<p>${escape(t.pickup.name)} → ${escape(t.destination.name)}</p><p>Conducteur : ${escape(t.driver?.name.split(" ")[0] || "")} · ${escape(t.driver?.driver.plate || "")}</p>${p ? `<p><a rel="noreferrer" href="https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}">Voir la dernière position sur Google Maps</a></p><p>Mise à jour : ${escape(new Date(t.updatedAt).toLocaleTimeString("fr-FR"))}</p>` : "<p>En attente de la position du conducteur.</p>"}<p>Le suivi fonctionne quand l’application du conducteur est ouverte. Actualisation toutes les 15 secondes.</p>` : ""}</main></body></html>`,
+        `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${active ? '<meta http-equiv="refresh" content="15">' : ""}<title>Suivi Pepo</title><body><main><h1>Pepo · Suivi de course</h1><p>${active ? "Course en cours" : "Course terminée ou annulée — suivi désactivé."}</p>${active ? `<p>${escape(t.pickup.name)} → ${escape(t.destination.name)}</p><p>Conducteur : ${escape(t.driver?.name.split(" ")[0] || "")} · ${escape(t.driver?.driver.plate || "")}</p>${p ? `<p><a rel="noreferrer" href="https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}">Voir la dernière position reçue sur Google Maps</a></p><p>Dernière position : ${escape(new Date(t.driverLocationAt!).toLocaleTimeString("fr-FR"))}</p>` : "<p>En attente de la position du conducteur.</p>"}<p>Le suivi fonctionne quand l’application du conducteur est ouverte. Actualisation toutes les 15 secondes.</p>` : ""}</main></body></html>`,
       );
   });
 }

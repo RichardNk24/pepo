@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { VehicleKind } from "@pepo/types/model";
+import type { ActiveVehicleKind } from "@pepo/types/model";
 import { demoFleet } from "../packages/maps/src/demoFleet";
 import {
-  arrangeVehicleOptions,
+  isVehicleVisible,
+  shouldShowVehicleDetails,
   vehicleOptionsDensity,
 } from "../apps/rider/src/domain/rideLayout";
 
-const kinds: VehicleKind[] = [
+const kinds: ActiveVehicleKind[] = [
   "moto",
-  "comfort",
+  "motoSend",
   "taxi",
   "suv",
-  "fourByFour",
   "minibus",
   "tricycle",
   "truck",
@@ -27,15 +27,15 @@ describe("vehicle options sheet", () => {
     ]);
   });
 
-  it("keeps the chosen vehicle first in compact mode and alone when collapsed", () => {
-    const options = kinds.map((id) => ({ id }));
+  it("keeps list order and reveals only the chosen row when collapsed", () => {
     expect(
-      arrangeVehicleOptions(options, "suv", "compact").map((x) => x.id),
-    ).toEqual(["suv", ...kinds.filter((kind) => kind !== "suv")]);
-    expect(arrangeVehicleOptions(options, "suv", "selected")).toEqual([
-      { id: "suv" },
-    ]);
-    expect(arrangeVehicleOptions(options, "suv", "expanded")).toEqual(options);
+      kinds.filter((id) => isVehicleVisible(id, "suv", "compact")),
+    ).toEqual(kinds);
+    expect(
+      kinds.filter((id) => isVehicleVisible(id, "suv", "selected")),
+    ).toEqual(["suv"]);
+    expect(shouldShowVehicleDetails("suv", "suv", "compact")).toBe(true);
+    expect(shouldShowVehicleDetails("moto", "suv", "compact")).toBe(false);
   });
 });
 

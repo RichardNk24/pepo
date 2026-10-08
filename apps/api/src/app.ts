@@ -29,6 +29,7 @@ import { register_map_search } from "./map-search/routes";
 import { register_maps } from "./maps/routes";
 import { register_personalized_places } from "./personalization/places";
 import { ApiError, createRuntime, type ServerConfig } from "./runtime";
+import { registerSafety, registerSafetyAdmin } from "./safety/routes";
 import { register_support } from "./support/routes";
 import { register_trips } from "./trips/routes";
 import { register_users } from "./users/routes";
@@ -52,6 +53,7 @@ export function createApp(store: Store, config: ServerConfig) {
   register_auth(ctx);
   app.use("/api/admin", admin);
   register_admin(ctx);
+  registerSafetyAdmin(ctx);
 
   app.use(
     "/api/maps",
@@ -81,6 +83,7 @@ export function createApp(store: Store, config: ServerConfig) {
   register_map_search(ctx);
   register_personalized_places(ctx);
   register_voice(ctx);
+  registerSafety(ctx);
   register_trips(ctx);
   register_support(ctx);
   app.use("/api", (_req, res) =>
@@ -111,6 +114,7 @@ export function createApp(store: Store, config: ServerConfig) {
               ? 400
               : 500;
       res.status(status).json({
+        code: error instanceof ApiError ? error.code : undefined,
         error: expected
           ? error.message
           : "Erreur serveur. Réessayez ou contactez l’équipe Pepo.",
@@ -119,6 +123,9 @@ export function createApp(store: Store, config: ServerConfig) {
   );
   return {
     app,
+    safetyTick: () => ctx.safety.tick().forEach(notify),
+    safetyCleanup: ctx.safety.cleanup,
+    safetyDriverEligible: ctx.safety.eligible,
     dispatchScheduled: (now = Date.now()) => {
       const changed = store.atomic(() => {
         const trips = store.trips(

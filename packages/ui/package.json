@@ -6,7 +6,8 @@
     "./ContactEditor": "./src/ContactEditor.tsx",
     "./PepoLogo": "./src/PepoLogo.tsx",
     "./UI": "./src/UI.tsx",
-    "./BrandSplash": "./src/BrandSplash.tsx"
+    "./BrandSplash": "./src/BrandSplash.tsx",
+    "./TripSafety": "./src/TripSafety.tsx"
   },
   "dependencies": {
     "@pepo/config": "1.2.0",

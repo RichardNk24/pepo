@@ -110,6 +110,7 @@ describe("Pepo API with real persistence and authorization", () => {
     dir = mkdtempSync(join(tmpdir(), "pepo-test-"));
     store = openDatabase(":memory:");
     app = createApp(store, {
+      safety: { enabled: false },
       devAuth: true,
       publicUrl: "https://pepo.test",
       adminToken: "admin-test",
@@ -155,6 +156,7 @@ describe("Pepo API with real persistence and authorization", () => {
       .send({ scheduledAt: scheduledAt + 3600000 })
       .expect(200);
     const service = createApp(store, {
+      safety: { enabled: false },
       devAuth: true,
       publicUrl: "https://pepo.test",
       adminToken: "admin-test",
@@ -178,7 +180,7 @@ describe("Pepo API with real persistence and authorization", () => {
       .expect(200);
     expect(store.trip(trip.id)?.status).toBe("cancelled");
   });
-  it("accepts SUV and 4x4 bookings, rejects invalid dates and overlapping slots", async () => {
+  it("accepts active vehicle bookings and rejects retired choices, rejects invalid dates and overlapping slots", async () => {
     const rider = await user();
     for (const scheduledAt of [
       Date.now() - 1000,
@@ -190,8 +192,17 @@ describe("Pepo API with real persistence and authorization", () => {
         .set(auth(rider.token))
         .send({ ...input, scheduledAt })
         .expect(400);
+    await request(app)
+      .post("/api/trips")
+      .set(auth(rider.token))
+      .send({
+        ...input,
+        vehicle: "fourByFour",
+        scheduledAt: Date.now() + 7200000,
+      })
+      .expect(400);
     const scheduledAt = Date.now() + 7200000;
-    for (const [i, vehicle] of ["suv", "fourByFour", "minibus"].entries()) {
+    for (const [i, vehicle] of ["suv", "motoSend", "minibus"].entries()) {
       const result = await request(app)
         .post("/api/trips")
         .set(auth(rider.token))

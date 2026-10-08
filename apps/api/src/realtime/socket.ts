@@ -1,4 +1,4 @@
-import type { Trip } from "@pepo/types/model";
+import type { Profile, Trip } from "@pepo/types/model";
 import { createHash } from "node:crypto";
 import type { Server as HttpServer } from "node:http";
 import { Server } from "socket.io";
@@ -8,6 +8,7 @@ export function attachRealtime(
   httpServer: HttpServer,
   store: Store,
   origins: string[],
+  eligible: (trip: Trip, driver: Profile) => boolean = () => true,
 ) {
   const io = new Server(httpServer, { cors: { origin: origins } });
   io.use((socket, next) => {
@@ -50,7 +51,12 @@ export function attachRealtime(
         trip.riderId,
         ...trip.offers.map((o) => o.driver.id),
         ...(trip.driverId ? [trip.driverId] : []),
-        ...(trip.status === "searching" ? availableDriverIds(store, trip) : []),
+        ...(trip.status === "searching"
+          ? availableDriverIds(store, trip).filter((id) => {
+              const p = store.user(id, "driver");
+              return p && eligible(trip, p);
+            })
+          : []),
       ]);
       // Only an invalidation event is sent; REST verifies the role, participant and session again.
       for (const id of ids) io.to(`user:${id}`).emit("refresh");

@@ -189,6 +189,8 @@ export type Trip = {
   startedAt?: number;
   rating?: number;
   driverLocation?: Point;
+  driverLocationAt?: number;
+  driverLocationAccuracy?: number;
   payment: "cash";
 };
 export type NewTrip = Pick<
@@ -250,3 +252,22 @@ export const ACTIVE_STATUSES: TripStatus[] = [
   "in_progress",
 ];
 export const isActive = (trip: Trip) => ACTIVE_STATUSES.includes(trip.status);
+
+export type SafetyReason = "stop" | "deviation" | "gps_unavailable";
+export type SafetyHelpStatus = "queued" | "acknowledged" | "resolved";
+export type TripSafetyState = {
+  enabled: boolean;
+  tier: "day" | "night" | "late";
+  timeZone: string;
+  serverTime: number;
+  lastLocationAt?: number;
+  locationQuality: "fresh" | "stale" | "imprecise" | "missing";
+  check?: { id: string; reason: SafetyReason; createdAt: number };
+  help?: {
+    id: string;
+    status: SafetyHelpStatus;
+    createdAt: number;
+    acknowledgedAt?: number;
+  };
+  supportPhone?: string;
+};

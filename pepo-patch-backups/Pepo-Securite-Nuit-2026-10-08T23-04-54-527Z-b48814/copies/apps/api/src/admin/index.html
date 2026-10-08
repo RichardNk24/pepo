@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pepo · Administration</title>
+    <link rel="stylesheet" href="/admin/style.css" />
+    <script src="/admin/app.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="mark">p.</span>
+        <div>
+          <p class="eyebrow">PEPO · OPÉRATIONS</p>
+          <h1>Des personnes avant des courses.</h1>
+        </div>
+      </header>
+      <section id="login">
+        <h2>Accès administrateur</h2>
+        <p>
+          Utilisez le secret ADMIN_TOKEN de votre serveur. Il reste en mémoire
+          dans cette page, sans stockage navigateur.
+        </p>
+        <form id="login-form">
+          <input
+            type="password"
+            id="token"
+            autocomplete="off"
+            placeholder="Secret administrateur"
+            required
+          /><button>Ouvrir les dossiers</button>
+        </form>
+      </section>
+      <p id="status" role="status"></p>
+      <section id="workspace" hidden>
+        <nav>
+          <button id="refresh">Actualiser</button
+          ><button id="logout" class="secondary">Fermer la session</button>
+        </nav>
+        <h2>Identités à examiner</h2>
+        <p>
+          Comparez le selfie à la pièce d’identité et à la photo de profil si
+          elle est fournie. Contrôlez le nom, la lisibilité et la validité du
+          document. Cette revue humaine ne constitue pas un contrôle automatique
+          de présence réelle.
+        </p>
+        <div id="identities"></div>
+        <h2>Dossiers conducteurs en attente</h2>
+        <p>
+          Examinez les quatre pièces. Vérifiez aussi les originaux, la validité
+          et la correspondance entre visage, identité, permis et véhicule selon
+          votre procédure locale.
+        </p>
+        <div id="drivers"></div>
+        <h2>Signalements</h2>
+        <p>
+          Les signalements sont enregistrés par le serveur. Organisez leur prise
+          en charge avec votre équipe.
+        </p>
+        <div id="incidents"></div>
+      </section>
+    </main>
+  </body>
+</html>

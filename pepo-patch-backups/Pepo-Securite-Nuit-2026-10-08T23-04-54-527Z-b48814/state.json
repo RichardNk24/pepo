@@ -1,0 +1,180 @@
+{
+  "patch": "Pepo-Securite-Nuit",
+  "files": [
+    {
+      "path": "apps/api/src/admin/app.js",
+      "before": "f4d1658431f7d5c883f4d24098ddbd09ed7c8ddd34df8b5e761421321335448c",
+      "after": "b8cba1784fed7dd733af75c492b7082fc364450968f51dbba5eda2db3449a5b0"
+    },
+    {
+      "path": "apps/api/src/admin/index.html",
+      "before": "0a45dd5d72551220fb5f8e486d473546bd80f69c0bbc80ac0689a5ee82d75619",
+      "after": "6b037972c649a326ee616478ae6aff187d5458aea3912357cb48378db82f7bf7"
+    },
+    {
+      "path": "apps/api/src/admin/routes.ts",
+      "before": "8f75e707144a3559b3994d4b3a19b0f6673a8e4e6fa4d9e4c65020d37104dc0e",
+      "after": "2fe73e9436eed9ca0d280bb3a450d34c6d3e76fd8cd175ab8395cee54039f4c3"
+    },
+    {
+      "path": "apps/api/src/admin/safety.js",
+      "before": null,
+      "after": "cde0c4ed3d8aba8a48c712b42197c3ec104a623e7605503fb7e039d55e153ce2"
+    },
+    {
+      "path": "apps/api/src/app.ts",
+      "before": "5af71a88d08f4194a087718aee1ed42104eced5aca907ae78fc0ec4f2acc120e",
+      "after": "26da1bd1592b106f6d8c547affe4ce2de3a9876a3b94d97b3eef622aa56e3ee6"
+    },
+    {
+      "path": "apps/api/src/database.ts",
+      "before": "8231c3779eafae8e22b0b088521d63003654ad78866abe864a4d5f90f45645ea",
+      "after": "aee4f09e05228b40b8e01c63e49c4161b2e83e0402d988d610bc3e993c975069"
+    },
+    {
+      "path": "apps/api/src/drivers/routes.ts",
+      "before": "d44219336c356117dcdbcbf9a7c10b4aa371d401d1edd890ff88bd707529c692",
+      "after": "26c227b13096cf9895c0ea12a5f4ad218a58905c29ec98d16ac6887a7f1bc03e"
+    },
+    {
+      "path": "apps/api/src/index.ts",
+      "before": "66d6a1bd559cbd947b6807cb64df3e1627d5073028381fbb1256121fcffb3820",
+      "after": "3466d73b5ba7d01ec5d00158a0fed667ee35a73c9f54187aee2817d5ff9b8d6f"
+    },
+    {
+      "path": "apps/api/src/realtime/socket.ts",
+      "before": "e75d152b22283a420fa072d2e28227ea26a6c9a633e38b7bb9b3473e43afc119",
+      "after": "abb33747544b7092050b7c1512b3f6f7d8f75cd85fb0be3e08e8410b7210ac7f"
+    },
+    {
+      "path": "apps/api/src/runtime.ts",
+      "before": "2f1114b022b8f469b2b1769b3d6ec02159bfe655407cb786946cdcfd34867843",
+      "after": "54764d94ac339baac6a4c5800c4e076af569a70068cb90efe94257644d82493c"
+    },
+    {
+      "path": "apps/api/src/safety/policy.ts",
+      "before": null,
+      "after": "2fb59ce1a98f9fe41b55483808023cade0e88f0402b92aeefb92d32263d9615e"
+    },
+    {
+      "path": "apps/api/src/safety/routes.ts",
+      "before": null,
+      "after": "4672a7c919537296d33d9635db48f3730ba35abec6a33c1ce4125b6a145597f3"
+    },
+    {
+      "path": "apps/api/src/safety/service.ts",
+      "before": null,
+      "after": "737c428386c2b5e614ede6145542f6df4cf3fea6a1c3db288ba4185aa18f70b3"
+    },
+    {
+      "path": "apps/api/src/support/routes.ts",
+      "before": "ce5cbfd468425a6a9ac03ecc6de4c4bb82affa4a69002620ee1a1b077dcb3e9c",
+      "after": "4d4747d5135ec766971f1b4c681bff2adc3b91be2b36323104353ab73076811d"
+    },
+    {
+      "path": "apps/api/src/trips/routes.ts",
+      "before": "84eef3fbc86a74aa9de83652075ac90091fdf04a5afdc236ab43ad3748ea5427",
+      "after": "98d966a7c987d817e567467aa8673559c517e780cc507c3a42bbfe2550a501e2"
+    },
+    {
+      "path": "apps/driver/app/ride-safety.tsx",
+      "before": null,
+      "after": "9d9c3105eb8c64fe34421a32e51c4107b06e17ecbe63fd34754457e56b7ba681"
+    },
+    {
+      "path": "apps/driver/app/ride.tsx",
+      "before": "0d2622f963f2a5d8bb456af97a643956a916babe3f216be0d656a8abcee76f12",
+      "after": "8ed5a53ca4269372b63de364ec71c1801c6de742ac50e16148414b315003b290"
+    },
+    {
+      "path": "apps/rider/app/ride-safety.tsx",
+      "before": null,
+      "after": "9d9c3105eb8c64fe34421a32e51c4107b06e17ecbe63fd34754457e56b7ba681"
+    },
+    {
+      "path": "apps/rider/app/ride.tsx",
+      "before": "86fa9211708c8e5ab334538aebb71cdc2b0d0f22bc3a6a501062bc4ca8e2c762",
+      "after": "c3e4532ba8ab4c8d180d0706267ca61517874e657dd2e3ed01d46306f06d60b6"
+    },
+    {
+      "path": "apps/rider/src/components/MapVehicle.tsx",
+      "before": "654b00dd6de5f61c6c86e26ea0a32d078e6ca34e3c01c5685af07af97174554a",
+      "after": "dee1ba8c3f1e74af44d95901944154d02cb0ed48658764ed5eb9fa9bcdea3070"
+    },
+    {
+      "path": "apps/rider/src/components/VehicleOptions.tsx",
+      "before": "faa699ffb0489cbf4d234e1385db0b6e79750a80b64e74e6463bce07bfcf930a",
+      "after": "0c1679c8806599666b4ecfe8cee5971f035d66caeb6a1be94640d2205aedf3e5"
+    },
+    {
+      "path": "packages/i18n/package.json",
+      "before": "fe9b5e7de67461f42113652d4b3531a6160b948b2c9576a11a51eb217bb7b276",
+      "after": "8a4d84e4b11dab448f4158074bd203f724d9f47f1bc001e269bede92335e58e4"
+    },
+    {
+      "path": "packages/i18n/src/copy.ts",
+      "before": "6fc1faff514cbc56f7d0f06acde14935b2b5a99c339a22c9e9b262e249f9741e",
+      "after": "afe043beadd20e73f1d5ebb7e460f989454c1e359c2fe8212b6336983cb9add4"
+    },
+    {
+      "path": "packages/i18n/src/safety.ts",
+      "before": null,
+      "after": "d4aaa8c5eb5e34e131ea14a3997c031d8c3944632a4578c78c663f54e0410d56"
+    },
+    {
+      "path": "packages/session/src/AppProvider.tsx",
+      "before": "fd24a69005f9261025ef6a92afaea0dac27cd16d6d280e112b42fdeb09ece5e0",
+      "after": "49d5998b0b799abe5a5e75ccb3c384dffe1fec9acc2f097cd5af73c687e5d48b"
+    },
+    {
+      "path": "packages/types/src/model.ts",
+      "before": "f56765ad883fa13052997b6947806b22cf3fa0f8d8ea206a506cb6baa057f634",
+      "after": "fdfd6f7f23a3b50b8af4554bab20053ce6177a06bd3b1ba74b94250ad78a8ca3"
+    },
+    {
+      "path": "packages/ui/package.json",
+      "before": "6975c15264d8519dae68f36ee6d4300bc44646969320b502c7347820b96cb7da",
+      "after": "8992ffafcfd4e63e95cd247675fef7a29e6a2cef7a64cc4720af85a6b1b81454"
+    },
+    {
+      "path": "packages/ui/src/TripSafety.tsx",
+      "before": null,
+      "after": "4125afe160547d57c40c5d24f5f38e9640ca211c518adfd6daf423f5a172b385"
+    },
+    {
+      "path": "tests/api.test.ts",
+      "before": "ae0647e79b5ab7481ad0b4511f44ff531c651ce4f1e9b270d806ae8dfe4ac849",
+      "after": "4902af23a64925525e791cf6bae1161cfd42199b8d0e629b2c62ac8880af0305"
+    },
+    {
+      "path": "tests/night-safety.test.ts",
+      "before": null,
+      "after": "e271528a6c62d87f7063a0e212d9da0d77f88489b0d0684a1eaa68000064643a"
+    },
+    {
+      "path": "tests/roles.test.ts",
+      "before": "4042285d853770e3375a1fec40cc14f63ba4074080f9838a6c3540a8a60a0fc3",
+      "after": "26f47502019fdfa1c9a9d12061523c70c53b9ed9261204f1999a4c5491c5eb75"
+    },
+    {
+      "path": "tests/vehicle-options-layout.test.ts",
+      "before": "bb1adeac171d533808b7050c32edd962235ca9623063f5c43a0cacd4bb846e26",
+      "after": "04e645af1b1dd053105ebc6ee3a3b5e401013237160d1ed136328926fa95c455"
+    },
+    {
+      "path": "docs/SECURITE-NUIT.md",
+      "before": null,
+      "after": "3bb8da9006efb7f78e9fd1f95bc52f45c9101b007ed18697681b146e19261e97"
+    },
+    {
+      "path": "docs/VALIDATION-SECURITE-NUIT.md",
+      "before": null,
+      "after": "cf06c87bdda947c7fba265b0801f1a80f1ccbe6f7add6cf765e92ff407de727a"
+    },
+    {
+      "path": "scripts/smoke-safety.cjs",
+      "before": null,
+      "after": "568eef2ce525174465ff9f5249f37b056dc3264daf64f07c04cdac52e8b93b62"
+    }
+  ]
+}

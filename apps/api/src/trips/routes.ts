@@ -1,4 +1,4 @@
-import type { Offer, Point, Trip } from "@pepo/types/model";
+import type { Offer, Trip } from "@pepo/types/model";
 import { CITIES } from "@pepo/utils/cities";
 import {
   assertTransition,
@@ -15,7 +15,6 @@ import {
   hash,
   id,
   place,
-  point,
   price,
   vehicle,
   wrap,
@@ -26,6 +25,7 @@ export function register_trips(ctx: RouteContext) {
     app,
     store,
     config,
+    safety,
     notify,
     publicDriver,
     visibleTrip,
@@ -48,22 +48,49 @@ export function register_trips(ctx: RouteContext) {
     "/api/trips/:id/live-activity-token",
     wrap((req, res) => {
       if (req.actor.role !== "passenger")
-        throw new ApiError(403, "Seul le passager peut activer le suivi de sa course.");
+        throw new ApiError(
+          403,
+          "Seul le passager peut activer le suivi de sa course.",
+        );
       const trip = requiredTrip(String(req.params.id));
       if (trip.riderId !== req.actor.id)
         throw new ApiError(403, "Cette course ne vous appartient pas.");
-      if (!["searching", "accepted", "arrived", "in_progress"].includes(trip.status))
+      if (
+        !["searching", "accepted", "arrived", "in_progress"].includes(
+          trip.status,
+        )
+      )
         throw new ApiError(409, "Le suivi de cette course n’est plus actif.");
-      const input = z.object({
-        activityId: z.string().min(1).max(120).regex(/^[a-zA-Z0-9_.:-]+$/),
-        pushToken: z.string().min(32).max(512).regex(/^[a-fA-F0-9]+$/),
-        language: z.enum(["fr", "en", "sw", "ln"]),
-      }).strict().parse(req.body);
-      store.db.prepare(
-        `INSERT INTO live_activity_tokens(tripId,riderId,activityId,pushToken,language,updatedAt)
+      const input = z
+        .object({
+          activityId: z
+            .string()
+            .min(1)
+            .max(120)
+            .regex(/^[a-zA-Z0-9_.:-]+$/),
+          pushToken: z
+            .string()
+            .min(32)
+            .max(512)
+            .regex(/^[a-fA-F0-9]+$/),
+          language: z.enum(["fr", "en", "sw", "ln"]),
+        })
+        .strict()
+        .parse(req.body);
+      store.db
+        .prepare(
+          `INSERT INTO live_activity_tokens(tripId,riderId,activityId,pushToken,language,updatedAt)
          VALUES(?,?,?,?,?,?)
          ON CONFLICT(tripId,activityId) DO UPDATE SET riderId=excluded.riderId,pushToken=excluded.pushToken,language=excluded.language,updatedAt=excluded.updatedAt`,
-      ).run(trip.id, req.actor.id, input.activityId, input.pushToken, input.language, Date.now());
+        )
+        .run(
+          trip.id,
+          req.actor.id,
+          input.activityId,
+          input.pushToken,
+          input.language,
+          Date.now(),
+        );
       res.status(204).end();
     }),
   );
@@ -73,9 +100,11 @@ export function register_trips(ctx: RouteContext) {
       const trip = requiredTrip(String(req.params.id));
       if (trip.riderId !== req.actor.id || req.actor.role !== "passenger")
         throw new ApiError(403, "Cette course ne vous appartient pas.");
-      store.db.prepare(
-        "DELETE FROM live_activity_tokens WHERE tripId=? AND riderId=? AND activityId=?",
-      ).run(trip.id, req.actor.id, String(req.params.activityId));
+      store.db
+        .prepare(
+          "DELETE FROM live_activity_tokens WHERE tripId=? AND riderId=? AND activityId=?",
+        )
+        .run(trip.id, req.actor.id, String(req.params.activityId));
       res.status(204).end();
     }),
   );
@@ -190,6 +219,7 @@ export function register_trips(ctx: RouteContext) {
             409,
             "Vous devez être disponible pour proposer un prix.",
           );
+        safety.requireEligible(t, req.actor);
         t.offers = t.offers.filter((o) => o.driver.id !== req.actor.id);
         const offer: Offer = {
           id: id(),
@@ -286,6 +316,7 @@ export function register_trips(ctx: RouteContext) {
           !o.riderCounter
         )
           throw new ApiError(409, "Cette contre-offre n’est plus disponible.");
+        safety.requireEligible(t, req.actor);
         o.price = o.riderCounter;
         delete o.riderCounter;
         o.status = "pending";
@@ -317,8 +348,10 @@ export function register_trips(ctx: RouteContext) {
           store.activeFor(driver.id).length
         )
           throw new ApiError(409, "Ce conducteur n’est plus disponible.");
+        safety.requireEligible(t, driver);
         t.driver = publicDriver(driver);
         t.driverId = driver.id;
+        safety.assigned(t);
         t.agreedPrice = o.price;
         t.status = "accepted";
         t.offers = t.offers.map((v) => ({
@@ -344,7 +377,11 @@ export function register_trips(ctx: RouteContext) {
         .parse(req.body);
       if (input.status === "in_progress") {
         const current = requiredTrip(String(req.params.id));
-        if (req.actor.id !== current.driverId || current.status !== "arrived")
+        if (
+          req.actor.role !== "driver" ||
+          req.actor.id !== current.driverId ||
+          current.status !== "arrived"
+        )
           throw new ApiError(
             403,
             "Seul le conducteur arrivé peut vérifier le code.",
@@ -370,9 +407,15 @@ export function register_trips(ctx: RouteContext) {
         const t = requiredTrip(String(req.params.id));
         participant(t, req.actor);
         assertTransition(t, input.status, req.actor, input.pin);
+        if (["arrived", "in_progress"].includes(input.status)) {
+          if (input.status === "in_progress")
+            safety.requireEligible(t, req.actor);
+          safety.requirePickup(t);
+        }
         t.status = input.status;
         if (input.status === "in_progress") t.startedAt = Date.now();
         t.updatedAt = Date.now();
+        if (["completed", "cancelled"].includes(input.status)) safety.finish(t);
         if (input.status === "completed") {
           t.completedAt = Date.now();
           for (const uid of [t.riderId, t.driverId]) {
@@ -427,20 +470,38 @@ export function register_trips(ctx: RouteContext) {
   app.post(
     "/api/trips/:id/location",
     wrap((req, res) => {
-      const location: Point = point.parse(req.body);
+      const input = z
+        .object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+          accuracy: z.number().min(0).max(10000).default(10000),
+          capturedAt: z.number().int().positive().default(safety.now()),
+        })
+        .strict()
+        .parse(req.body);
       const t = requiredTrip(String(req.params.id));
       if (
+        req.actor.role !== "driver" ||
         req.actor.id !== t.driverId ||
         !["accepted", "arrived", "in_progress"].includes(t.status)
       )
         throw new ApiError(403, "Le suivi n’est pas actif pour cette course.");
-      if (haversine(location, t.pickup) > 100)
+      if (haversine(input, t.pickup) > 100)
         throw new ApiError(
           400,
           "Cette position est hors de la zone de la course.",
         );
-      t.driverLocation = location;
+      const location = safety.saveDriverFix(req.actor.id, input);
+      if (t.driverLocationAt && location.capturedAt <= t.driverLocationAt)
+        return res.json({ ok: true });
+      t.driverLocation = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      };
+      t.driverLocationAt = location.capturedAt;
+      t.driverLocationAccuracy = location.accuracy;
       t.updatedAt = Date.now();
+      safety.observe(t, location);
       store.saveTrip(t);
       notify(t);
       res.json({ ok: true });
@@ -465,6 +526,13 @@ export function register_trips(ctx: RouteContext) {
     wrap((req, res) => {
       const t = requiredTrip(String(req.params.id));
       participant(t, req.actor);
+      if (
+        !(
+          (req.actor.role === "passenger" && req.actor.id === t.riderId) ||
+          (req.actor.role === "driver" && req.actor.id === t.driverId)
+        )
+      )
+        throw new ApiError(403, "Cette course ne vous appartient pas.");
       if (
         !t.driverId ||
         !["accepted", "arrived", "in_progress"].includes(t.status)
@@ -500,10 +568,28 @@ export function register_trips(ctx: RouteContext) {
         !["accepted", "arrived", "in_progress"].includes(t.status)
       )
         throw new ApiError(409, "Partagez une course active.");
+      if (
+        !(
+          (req.actor.role === "passenger" && req.actor.id === t.riderId) ||
+          (req.actor.role === "driver" && req.actor.id === t.driverId)
+        )
+      )
+        throw new ApiError(403, "Cette course ne vous appartient pas.");
       const token = randomBytes(24).toString("hex");
-      store.db
-        .prepare("INSERT INTO shares VALUES(?,?,?)")
-        .run(hash(token), t.id, Date.now() + 4 * 3600000);
+      store.atomic(() => {
+        // Bound the number of live links. Old links made before this patch can still expire normally.
+        store.db
+          .prepare(
+            "DELETE FROM shares WHERE hash IN (SELECT hash FROM share_owners WHERE userId=? AND role=?)",
+          )
+          .run(req.actor.id, req.actor.role);
+        store.db
+          .prepare("INSERT INTO shares VALUES(?,?,?)")
+          .run(hash(token), t.id, Date.now() + 4 * 3600000);
+        store.db
+          .prepare("INSERT INTO share_owners VALUES(?,?,?)")
+          .run(hash(token), req.actor.id, req.actor.role);
+      });
       res.json({ url: `${config.publicUrl}/track/${token}`, expiresIn: 14400 });
     }),
   );

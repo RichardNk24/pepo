@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { z } from "zod";
 import type { Store } from "./database";
+import { createSafety } from "./safety/service";
 import { sendTripActivityUpdate } from "./live-activities/apns";
 
 export type ServerConfig = {
@@ -27,11 +28,13 @@ export type ServerConfig = {
   dataDir: string;
   corsOrigins: string[];
   sendSms?: (phone: string, text: string) => Promise<void>;
+  safety?: { enabled?: boolean; supportPhone?: string; now?: () => number };
 };
 export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public code?: string,
   ) {
     super(message);
   }
@@ -87,7 +90,9 @@ export function isLocalExpoWebOrigin(origin: string): boolean {
     const octets = url.hostname.split(".").map(Number);
     if (
       octets.length !== 4 ||
-      octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)
+      octets.some(
+        (octet) => !Number.isInteger(octet) || octet < 0 || octet > 255,
+      )
     )
       return false;
 
@@ -155,6 +160,7 @@ export function createRuntime(store: Store, config: ServerConfig) {
       legacyHeaders: false,
     }),
   );
+  const safety = createSafety(store, config);
   let onChange: (trip: Trip) => void = () => {};
   const notify = (t: Trip) => {
     onChange(t);
@@ -181,6 +187,8 @@ export function createRuntime(store: Store, config: ServerConfig) {
       delete result.riderPhone;
       if (result.guest) delete result.guest.phone;
       delete result.driverLocation;
+      delete result.driverLocationAt;
+      delete result.driverLocationAccuracy;
     }
     if (actor.id !== t.riderId)
       result.offers = result.offers.filter((o) => o.driver.id === actor.id);
@@ -260,6 +268,7 @@ export function createRuntime(store: Store, config: ServerConfig) {
       throw new ApiError(400, "Ce lieu est en dehors de la ville choisie.");
   };
   return {
+    safety,
     validateMapArea,
     app,
     store,

@@ -1,56 +1,57 @@
 import {
-api,
-API_URL,
-configureClient,
-getToken,
-LIVE,
-loadToken,
-RequestError,
-saveToken,
+  api,
+  API_URL,
+  configureClient,
+  getToken,
+  LIVE,
+  loadToken,
+  RequestError,
+  saveToken,
 } from "@pepo/api-client/api";
-import { mapRoute,MAPS_API_URL,searchMapPlaces } from "@pepo/api-client/maps";
-import { translate,type TranslationKey } from "@pepo/i18n/catalog";
+import { mapRoute, MAPS_API_URL, searchMapPlaces } from "@pepo/api-client/maps";
+import { safetyText, type SafetyKey } from "@pepo/i18n/safety";
+import { translate, type TranslationKey } from "@pepo/i18n/catalog";
 import { I18nProvider } from "@pepo/i18n/Context";
 import { safeLanguage } from "@pepo/i18n/locale";
 import type {
-ChatMessage,
-CityId,
-DocumentKind,
-Language,
-NewTrip,
-Place,
-Profile,
-Role,
-Route,
-Settings,
-Trip,
-TripStatus,
+  ChatMessage,
+  CityId,
+  DocumentKind,
+  Language,
+  NewTrip,
+  Place,
+  Profile,
+  Role,
+  Route,
+  Settings,
+  Trip,
+  TripStatus,
 } from "@pepo/types/model";
 import { isActive } from "@pepo/types/model";
-import { DEMO_DRIVERS,PLACES } from "@pepo/utils/cities";
+import { DEMO_DRIVERS, PLACES } from "@pepo/utils/cities";
 import {
-assertTransition,
-canDrive,
-estimateRoute,
-estimateRouteWithStops,
-fare,
-suggestedFare,
-validateNewTrip,
+  assertTransition,
+  canDrive,
+  estimateRoute,
+  estimateRouteWithStops,
+  fare,
+  suggestedFare,
+  validateNewTrip,
 } from "@pepo/utils/rules";
 import { releaseScheduled } from "@pepo/utils/scheduling";
 import { estimatedStopOrder } from "@pepo/utils/stopOrdering";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
 import {
-createContext,
-useCallback,
-useContext,
-useEffect,
-useRef,
-useState,
-type ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
 } from "react";
-import { AppState,Platform,Share } from "react-native";
+import { AppState, Platform, Share } from "react-native";
 import { io } from "socket.io-client";
 import { useLocation } from "./LocationProvider";
 
@@ -466,6 +467,55 @@ export function AppProvider({
     }, 1500);
     return () => clearInterval(timer);
   }, [state.profile?.id, state.profile?.role, commit]);
+  const driverLocationRef = useRef(location);
+  driverLocationRef.current = location;
+  useEffect(() => {
+    if (
+      !LIVE ||
+      state.profile?.role !== "driver" ||
+      (!state.profile.online && !activeTrip)
+    )
+      return;
+    let disposed = false,
+      sending = false;
+    const send = async () => {
+      if (disposed || sending || AppState.currentState !== "active") return;
+      sending = true;
+      try {
+        const loc = driverLocationRef.current;
+        const fix = await loc.enable();
+        if (disposed) return;
+        await api("/me/safety/location", {
+          method: "POST",
+          body: {
+            latitude: fix.latitude,
+            longitude: fix.longitude,
+            accuracy: fix.accuracy ?? 10000,
+            capturedAt: fix.timestamp,
+          },
+        });
+      } catch {
+        /* A missing fix stays visible and cannot pass night eligibility. */
+      } finally {
+        sending = false;
+      }
+    };
+    void send();
+    const timer = setInterval(() => void send(), 20000);
+    const sub = AppState.addEventListener("change", (v) => {
+      if (v === "active") void send();
+    });
+    return () => {
+      disposed = true;
+      clearInterval(timer);
+      sub.remove();
+    };
+  }, [
+    state.profile?.id,
+    state.profile?.role,
+    state.profile?.online,
+    activeTrip?.id,
+  ]);
   const locationSent = useRef({ timestamp: 0, trip: "" });
   useEffect(() => {
     const fix = location.fix;
@@ -487,7 +537,12 @@ export function AppProvider({
     locationSent.current = { timestamp: fix.timestamp, trip: activeTrip.id };
     void api(`/trips/${activeTrip.id}/location`, {
       method: "POST",
-      body: { latitude: fix.latitude, longitude: fix.longitude },
+      body: {
+        latitude: fix.latitude,
+        longitude: fix.longitude,
+        accuracy: fix.accuracy ?? 10000,
+        capturedAt: fix.timestamp,
+      },
     }).catch(() => {
       locationSent.current.timestamp = 0;
     });
@@ -516,12 +571,42 @@ export function AppProvider({
     simulation = false,
   ) => {
     if (LIVE) {
-      putTrip(
-        await api<Trip>(`/trips/${tripId}/status`, {
+      if (
+        ["arrived", "in_progress"].includes(status) &&
+        ref.current.profile?.role === "driver"
+      ) {
+        const fix = await driverLocationRef.current.enable();
+        await api(`/trips/${tripId}/location`, {
           method: "POST",
-          body: { status, pin },
-        }),
-      );
+          body: {
+            latitude: fix.latitude,
+            longitude: fix.longitude,
+            accuracy: fix.accuracy ?? 10000,
+            capturedAt: fix.timestamp,
+          },
+        });
+      }
+      try {
+        putTrip(
+          await api<Trip>(`/trips/${tripId}/status`, {
+            method: "POST",
+            body: { status, pin },
+          }),
+        );
+      } catch (e) {
+        if (
+          e instanceof RequestError &&
+          [
+            "NIGHT_REVIEW_REQUIRED",
+            "SAFETY_GPS_REQUIRED",
+            "SAFETY_PICKUP_DISTANCE",
+          ].includes(e.code || "")
+        )
+          throw new Error(
+            safetyText(ref.current.settings.language, e.code as SafetyKey),
+          );
+        throw e;
+      }
       return;
     }
     const t = tripRequired(tripId);

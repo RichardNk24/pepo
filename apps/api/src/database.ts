@@ -30,6 +30,17 @@ export function openDatabase(path: string) {
     CREATE TABLE IF NOT EXISTS place_preferences (userId TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, suggestionsEnabled INTEGER NOT NULL DEFAULT 1 CHECK(suggestionsEnabled IN (0,1)), updatedAt INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS live_activity_tokens (tripId TEXT NOT NULL REFERENCES trips(id) ON DELETE CASCADE, riderId TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, activityId TEXT NOT NULL, pushToken TEXT NOT NULL, language TEXT NOT NULL CHECK(language IN ('fr','en','sw','ln')), updatedAt INTEGER NOT NULL, PRIMARY KEY(tripId,activityId));
     CREATE INDEX IF NOT EXISTS live_activity_trip ON live_activity_tokens(tripId);
+    CREATE TABLE IF NOT EXISTS safety_driver_approval (userId TEXT PRIMARY KEY REFERENCES users(id), fingerprint TEXT NOT NULL, expiresAt INTEGER NOT NULL, reviewedAt INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS safety_driver_fix (userId TEXT PRIMARY KEY REFERENCES users(id), data TEXT NOT NULL, receivedAt INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS safety_observation (tripId TEXT PRIMARY KEY REFERENCES trips(id), data TEXT NOT NULL, updatedAt INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS safety_checks (id TEXT PRIMARY KEY, tripId TEXT NOT NULL REFERENCES trips(id), userId TEXT NOT NULL REFERENCES users(id), role TEXT NOT NULL, reason TEXT NOT NULL, createdAt INTEGER NOT NULL, answeredAt INTEGER, answer TEXT, escalatedAt INTEGER);
+    CREATE INDEX IF NOT EXISTS safety_checks_trip_user ON safety_checks(tripId,userId,role,createdAt DESC);
+    CREATE TABLE IF NOT EXISTS safety_help (id TEXT PRIMARY KEY, tripId TEXT NOT NULL REFERENCES trips(id), userId TEXT NOT NULL REFERENCES users(id), role TEXT NOT NULL, source TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('queued','acknowledged','resolved')), createdAt INTEGER NOT NULL, acknowledgedAt INTEGER, resolvedAt INTEGER);
+    CREATE INDEX IF NOT EXISTS safety_help_queue ON safety_help(status,createdAt);
+    CREATE UNIQUE INDEX IF NOT EXISTS safety_help_open ON safety_help(tripId,userId,role) WHERE status<>'resolved';
+    CREATE TABLE IF NOT EXISTS safety_stop_context (tripId TEXT PRIMARY KEY REFERENCES trips(id), reason TEXT NOT NULL, expiresAt INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS safety_audit (id INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT NOT NULL, subject TEXT NOT NULL, createdAt INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS share_owners (hash TEXT PRIMARY KEY REFERENCES shares(hash) ON DELETE CASCADE, userId TEXT NOT NULL REFERENCES users(id), role TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS user_capabilities (userId TEXT NOT NULL REFERENCES users(id), capability TEXT NOT NULL CHECK(capability IN ('RIDER','DRIVER','ADMIN','SUPPORT')), PRIMARY KEY(userId,capability));
   `);
   db.exec(

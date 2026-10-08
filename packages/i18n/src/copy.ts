@@ -1,3 +1,4 @@
+import { translateSafetyCopy } from "./safety";
 import type { Language } from "@pepo/types/model";
 import { catalogs } from "./catalog";
 export const copyTranslations: Record<
@@ -1377,6 +1378,8 @@ const baseIndex = new Map(
 export function translateCopy(language: Language, source: string) {
   if (language === "fr" || !source.trim()) return source;
   const normalized = normalize(source);
+  const safety = translateSafetyCopy(language, normalized);
+  if (safety) return safety;
   const match = indexed.get(normalized);
   if (match) return match[({ en: 0, sw: 1, ln: 2 } as const)[language]];
   const key = baseIndex.get(normalized);
