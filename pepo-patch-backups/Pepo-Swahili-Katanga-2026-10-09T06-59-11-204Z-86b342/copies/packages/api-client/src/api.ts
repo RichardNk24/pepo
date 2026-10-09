@@ -45,20 +45,13 @@ export async function api<T>(
     body?: unknown;
     form?: FormData;
     signal?: AbortSignal;
-    timeoutMs?: number;
   } = {},
 ): Promise<T> {
   const controller = new AbortController();
   const cancel = () => controller.abort();
   options.signal?.addEventListener("abort", cancel, { once: true });
   if (options.signal?.aborted) controller.abort();
-  const timeout = options.timeoutMs;
-  const timer = setTimeout(
-    cancel,
-    typeof timeout === "number" && Number.isFinite(timeout)
-      ? Math.max(1000, Math.min(45000, timeout))
-      : 16000,
-  );
+  const timer = setTimeout(cancel, 16000);
   try {
     const response = await fetch(`${API_URL}/api${path}`, {
       method: options.method || "GET",

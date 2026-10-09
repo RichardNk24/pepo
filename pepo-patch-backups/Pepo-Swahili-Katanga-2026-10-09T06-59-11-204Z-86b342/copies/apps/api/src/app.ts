@@ -28,7 +28,6 @@ import { register_admin } from "./admin/routes";
 import { register_auth } from "./auth/routes";
 import { register_documents } from "./documents/routes";
 import { register_drivers } from "./drivers/routes";
-import { registerVoiceCorpus } from "./voice/corpusRoutes";
 import { register_voice } from "./voice/routes";
 import { register_map_search } from "./map-search/routes";
 import { register_maps } from "./maps/routes";
@@ -89,7 +88,6 @@ export function createApp(store: Store, config: ServerConfig) {
   register_map_search(ctx);
   register_personalized_places(ctx);
   register_voice(ctx);
-  registerVoiceCorpus(ctx);
   registerVoiceNavigation(ctx);
   registerSafety(ctx);
   register_trips(ctx);
