@@ -1,17 +1,17 @@
 import {
-smoothHeading,
-validPoint,
-type LocationFix,
+  smoothHeading,
+  validPoint,
+  type LocationFix,
 } from "@pepo/utils/mapGeometry";
 import * as Location from "expo-location";
-import React,{
-createContext,
-useContext,
-useEffect,
-useRef,
-useState,
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
-import { AppState,Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 
 type Status =
   | "idle"
@@ -48,6 +48,11 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     if (!alive.current || !validPoint(position.coords)) return;
     const value = {
       latitude: position.coords.latitude,
+      ...(position.coords.speed != null &&
+      Number.isFinite(position.coords.speed) &&
+      position.coords.speed >= 0
+        ? { speed: position.coords.speed }
+        : {}),
       longitude: position.coords.longitude,
       accuracy:
         position.coords.accuracy != null &&

@@ -1,3 +1,4 @@
+import { TripNavigation } from "@pepo/voice/TripNavigation";
 import { C } from "@pepo/config/tokens";
 import MapBoard from "@pepo/maps/MapBoard";
 import { useApp } from "@pepo/session/AppProvider";
@@ -19,7 +20,10 @@ import { fare } from "@pepo/utils/rules";
 import { parseVoice, type VoiceAction } from "@pepo/voice/commands";
 import { navigationUrl } from "@pepo/voice/navigation";
 import { useVoice } from "@pepo/voice/useVoice";
-import { VoiceButton } from "@pepo/voice/VoiceButton";
+import { DestinationSpeechButton } from "@pepo/voice/DestinationSpeechButton";
+import { useVoicePreferences } from "@pepo/voice/preferences";
+import { profileFor } from "@pepo/voice/profiles";
+import { understandSpeech } from "@pepo/voice/speechIntent";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Linking, ScrollView, View } from "react-native";
@@ -33,6 +37,12 @@ export default function DriverRide() {
     insets = useSafeAreaInsets(),
     params = useLocalSearchParams<{ id: string }>();
   const [pin, setPin] = useState("");
+  const { preferences } = useVoicePreferences();
+  const [spokenCommand, setSpokenCommand] = useState<{
+    text: string;
+    id: number;
+  }>();
+  const [transcript, setTranscript] = useState("");
   const trip = app.trips.find((t) => t.id === params.id),
     voice = useVoice();
   if (!app.ready) return null;
@@ -166,6 +176,13 @@ export default function DriverRide() {
             </Txt>
           </>
         ) : null}
+        {["accepted", "arrived", "in_progress"].includes(trip.status) ? (
+          <TripNavigation
+            trip={trip}
+            spokenCommand={spokenCommand}
+            onSettings={() => router.push("/voice-settings")}
+          />
+        ) : null}
         <Button
           title={app.t("voiceReadout")}
           kind="secondary"
@@ -176,9 +193,25 @@ export default function DriverRide() {
           }
         />
         {voice.message ? <Txt>{voice.message}</Txt> : null}
-        <VoiceButton
+        {transcript ? <Txt>{transcript}</Txt> : null}
+        <DestinationSpeechButton
           onResult={(text) => {
-            const i = parseVoice(text, app.settings.language, false);
+            setTranscript(text);
+            const language = profileFor(preferences.profile).language;
+            const nav = understandSpeech(text, language, false);
+            if (["repeat", "mute", "unmute"].includes(nav.kind)) {
+              setSpokenCommand({ text, id: Date.now() });
+              return;
+            }
+            if (!["fr", "en", "sw", "ln"].includes(language)) {
+              ui.alert(app.t("voice"), app.t("voiceNotUnderstood"));
+              return;
+            }
+            const i = parseVoice(
+              text,
+              language as "fr" | "en" | "sw" | "ln",
+              false,
+            );
             if (i.kind === "command")
               void command(i.action).catch((e) =>
                 ui.alert("Pepo", (e as Error).message),

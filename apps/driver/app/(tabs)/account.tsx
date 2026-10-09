@@ -14,6 +14,19 @@ export default function DriverAccount() {
     <Screen>
       <Header title={app.t("account")} eyebrow="Pepo Driver" />
       <ScrollView contentContainerStyle={{ padding: 24, gap: 16 }}>
+        <Button
+          title="Voix et navigation"
+          kind="secondary"
+          onPress={() => router.push("/voice-settings")}
+        />
+        {__DEV__ ? (
+          <Button
+            title="Pepo Voice Intelligence Lab"
+            kind="secondary"
+            onPress={() => router.push("/voice-lab")}
+          />
+        ) : null}
+
         <View style={s.row}>
           <Avatar name={app.profile?.name || "Pepo"} />
           <View>

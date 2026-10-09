@@ -1,0 +1,290 @@
+{
+  "patch": "Pepo-Voice-Intelligence",
+  "files": [
+    {
+      "path": "apps/api/package.json",
+      "before": "10d645dbc33a1c7deba6098c871aedee1f4b2d24e0263c5e78c6a2b11dabad6d",
+      "after": "eaca11aafdf6bed34ab4c08641f0a7682029df88e8c82a9f7e23e39bee683326"
+    },
+    {
+      "path": "apps/api/src/app.ts",
+      "before": "26da1bd1592b106f6d8c547affe4ce2de3a9876a3b94d97b3eef622aa56e3ee6",
+      "after": "b79939c896734fc25debcec2b521e692d0724b88fa0f4ee86d8311d9a05c64c8"
+    },
+    {
+      "path": "apps/api/src/map-search/routes.ts",
+      "before": "823eb6c7e1e2767a46f5b0d2104efabfd334de8067881a6cdd982fcf766de021",
+      "after": "b92ca06126ea7a1b0b13d2e60d11acc72557bb6da56e7d6662414a47ec7db2c3"
+    },
+    {
+      "path": "apps/api/src/maps.ts",
+      "before": "5b1de6c277947a09c32cc63c930d145ccadcbf6c563cf5d8532857676005a47f",
+      "after": "b49aafb2f937284370db8c4fd9c04514aaf560ff936308ab8fd17fa153e1b1e4"
+    },
+    {
+      "path": "apps/api/src/voice/geo.ts",
+      "before": null,
+      "after": "ec7fc6286a21813161338708add168a09c9b3a1716bc31d30646d7ffcb827eb9"
+    },
+    {
+      "path": "apps/api/src/voice/navigationRoutes.ts",
+      "before": null,
+      "after": "cac2f266907c3b7607ac17c99364b8a1243a58076a92d468a74fe0395fb7da91"
+    },
+    {
+      "path": "apps/api/src/voice/providers.ts",
+      "before": null,
+      "after": "893fbfd7662a58cac25c4b43e3a92f904930b855f7973f054e2e0a3a6b360acf"
+    },
+    {
+      "path": "apps/api/src/voice/routes.ts",
+      "before": "8c0435b8ccc0652515bd8662bc8ff8169fefeb37e3d427ae1ce1b240a625951d",
+      "after": "54e4b9ab248807be838028c85a5f0f2c17e683e272796b0c3c521de49570c3b5"
+    },
+    {
+      "path": "apps/driver/app/(tabs)/account.tsx",
+      "before": "7f18ad640ac7c06fbcab432dd2f03b46e3fb0d931e50c2b02c5e926990899903",
+      "after": "0decbf6d04a825b03875aa45b83da2301c80751646546d9855ebfeec2bf274a9"
+    },
+    {
+      "path": "apps/driver/app/_layout.tsx",
+      "before": "b91f0b7f420a3389e15206b13f467c5e8a3e2ad5c748df73b38e548541e3c79d",
+      "after": "ea14202728c83eaa1a76cf5e6a4129d6458c44cf698594ffe3316591d726bbdb"
+    },
+    {
+      "path": "apps/driver/app/ride.tsx",
+      "before": "8ed5a53ca4269372b63de364ec71c1801c6de742ac50e16148414b315003b290",
+      "after": "f4f607d5ce94a1e4bdb559afa0b58b04d4b4cc6726d7dcdf487703de2c16fa0f"
+    },
+    {
+      "path": "apps/driver/app/voice-lab.tsx",
+      "before": null,
+      "after": "2cb21d1f6338cd64f148711bfb6354c9d7ba92200d5096fe98b45b8fbd4c23c3"
+    },
+    {
+      "path": "apps/driver/app/voice-settings.tsx",
+      "before": null,
+      "after": "1c2735e6faf87d0ccae6dd107d9eb45f9f22cd25a3e4e4abd5c08fb9086239a7"
+    },
+    {
+      "path": "apps/driver/package.json",
+      "before": "bcbd5dbaa4b4a6ba48912ba4e042e4dcc178b1751f729fd1337a26d8a01dade2",
+      "after": "6542eec3e6039d4619ba0fc3299f75583f2ded5b74ce53f66f7a208f8dfaa6ee"
+    },
+    {
+      "path": "apps/rider/app/(tabs)/account.tsx",
+      "before": "e077e12bbb22b598d07c3c3a1e176be350ca381a738616037d1817b3809bd308",
+      "after": "9260c1609cfdb7efe99322e2a4ed8c40ede8fc39eb1d20372c43313d5b2619cf"
+    },
+    {
+      "path": "apps/rider/app/_layout.tsx",
+      "before": "365ff419084db88d99e6c674059d949acd4dcd8977d602cd959d477e6d7f0562",
+      "after": "059fca3a67ecc40cc568ee69d6c695bf49767d7db901e135d902baf1f1e140e9"
+    },
+    {
+      "path": "apps/rider/app/voice-lab.tsx",
+      "before": null,
+      "after": "2cb21d1f6338cd64f148711bfb6354c9d7ba92200d5096fe98b45b8fbd4c23c3"
+    },
+    {
+      "path": "apps/rider/app/voice-settings.tsx",
+      "before": null,
+      "after": "1c2735e6faf87d0ccae6dd107d9eb45f9f22cd25a3e4e4abd5c08fb9086239a7"
+    },
+    {
+      "path": "apps/rider/src/components/DestinationVoiceButton.tsx",
+      "before": "ecc588ced0fb81316580c36e010c2fe426607bb756eeb8f359ba0a6fef3be4d7",
+      "after": "f9cfa61d7542e45d36ccbaf3d9c176f25604890d40bf126fa4018f02b49efd47"
+    },
+    {
+      "path": "apps/rider/src/components/DestinationVoiceButton.web.tsx",
+      "before": "630cace7825cdbd57c9d2f624b4bdf012fe49f633882dc78d156e557ebea8b7d",
+      "after": "f9cfa61d7542e45d36ccbaf3d9c176f25604890d40bf126fa4018f02b49efd47"
+    },
+    {
+      "path": "apps/rider/src/components/PlaceSearch.tsx",
+      "before": "237eb2ff180c119fd14ded7bc3234962fde5440611c2b101120d115454e2aacb",
+      "after": "739fdebe2f99a889b91a324f0ff80f6b449289f382755adc882d1292cebae075"
+    },
+    {
+      "path": "apps/rider/src/components/voiceCapture.ts",
+      "before": "abe5a7fbf9a922a3941baed51eb99c9a7fb2ad9c2e5c146c9f46c9a8938389f1",
+      "after": "003ef3c74ebaaf3812141fd366a6bc05cce6467963c74fb7a36098f7b9855be7"
+    },
+    {
+      "path": "apps/rider/src/components/voiceUpload.ts",
+      "before": "b041eedb3c647abdcf4e48b2716a7b19925a78ab5e5acb6ea3d423c2684966ea",
+      "after": "6272a3f735ece9c309e3fcbd221173dcc17657ec6fae3bd61669fc22ad4e6ae1"
+    },
+    {
+      "path": "docs/PEPO-VOICE-INTELLIGENCE.md",
+      "before": null,
+      "after": "381a26368b3e6d10a59545e2b05611429a10aae2035beb50baec7f4523884163"
+    },
+    {
+      "path": "docs/VALIDATION-PEPO-VOICE.md",
+      "before": null,
+      "after": "a011463a19bd97f24429881c8e1bce04ad5680ab55f5e046ec6774ecbf149465"
+    },
+    {
+      "path": "package-lock.json",
+      "before": "2f7be6b0fae439c85bf57d409e335b72808518b312973aef39f75ff0a74448d4",
+      "after": "350f95e59eb2173e15b302ae69007c19e54088d0649493ac771e8faee122754d"
+    },
+    {
+      "path": "packages/session/src/LocationProvider.tsx",
+      "before": "3e6efd181f88e8baa141b6880c2dd7f8d98dfc608d1b93ead17969f5ec97b5fd",
+      "after": "f9a90d3e16b6dab8152c7bad002ba8f091faae96e2e294a25b78af43215c98f8"
+    },
+    {
+      "path": "packages/types/src/model.ts",
+      "before": "fdfd6f7f23a3b50b8af4554bab20053ce6177a06bd3b1ba74b94250ad78a8ca3",
+      "after": "ca4c02909a9bd5d4d6af06ab8b7664b0c383add4b20e6a3d573e4019cda0d94c"
+    },
+    {
+      "path": "packages/utils/src/mapGeometry.ts",
+      "before": "9dcf061d204eb092478b2cbf4d2fb1ba3d71b258ab57640f446e4878bffdde8c",
+      "after": "2537309c462616a4623969b0d7ddb75ce8fae39e060a2a4b38935b1e28a655e4"
+    },
+    {
+      "path": "packages/voice/package.json",
+      "before": "c064c915afa03272dc8746b50c7087942866c9301d0e7f83ac401843fda84d2f",
+      "after": "f762f9349c9b1e001f8cac32e83a7b8cd8fbee905307074f48b216f331cd316e"
+    },
+    {
+      "path": "packages/voice/src/DestinationSpeechButton.tsx",
+      "before": null,
+      "after": "54dd49a3fd05e11dfffaf6f01d3686d2a30130ddd8863f6e729cc77c0c6028e7"
+    },
+    {
+      "path": "packages/voice/src/DestinationSpeechButton.web.tsx",
+      "before": null,
+      "after": "429a15e2eba4c21dbaa7642d83bf1c7caea6a9fb963c7e817269b3c7a26b0332"
+    },
+    {
+      "path": "packages/voice/src/TripNavigation.tsx",
+      "before": null,
+      "after": "9dcbddbee23ecfe843d2d85de3a5b367afb2b2bdc0cd62cc21530a6ecb8a8d23"
+    },
+    {
+      "path": "packages/voice/src/VoiceLab.tsx",
+      "before": null,
+      "after": "da1c2a8ee68564e3a9c6900020c6ced134d4453db502e370ffa28b2fe5017b1d"
+    },
+    {
+      "path": "packages/voice/src/VoiceSettings.tsx",
+      "before": null,
+      "after": "b7339fd80a33b97bc15992053795c23ab912c30a391ac564cba7cde9100d9276"
+    },
+    {
+      "path": "packages/voice/src/engine.ts",
+      "before": null,
+      "after": "78a6a2977c24eb7525f1ced21d5aed4ce5f537a65a37aee0d03f13dd26c5b08a"
+    },
+    {
+      "path": "packages/voice/src/evaluation.ts",
+      "before": null,
+      "after": "12abb935c25f01055dc5f8476e1a90fc0cd472765500a0c7fabc9232f8d8127f"
+    },
+    {
+      "path": "packages/voice/src/fixtures.ts",
+      "before": null,
+      "after": "c4cdbc1cfdf3d2b0c2de3acabe5d7a45c8dfa7650d62bcd2cc7874eab22bee2f"
+    },
+    {
+      "path": "packages/voice/src/geometry.ts",
+      "before": null,
+      "after": "74a1f5972f3d17e9607128967285140b457aa912396150a5e2f900d7182cd18f"
+    },
+    {
+      "path": "packages/voice/src/instructions.ts",
+      "before": null,
+      "after": "91218a91e9a576a7f6f3da2db9dd0c0d1cd0a228819efac673285043d8fdf1cd"
+    },
+    {
+      "path": "packages/voice/src/landmarks.ts",
+      "before": null,
+      "after": "0a12469c07245942fed83f20b088f7195e15f965b89f6a410dd2545b3b54687c"
+    },
+    {
+      "path": "packages/voice/src/nativeOutput.ts",
+      "before": null,
+      "after": "34bb64d923509d936e6d21b535033b6bb6abdc315bde1f01d7b5696fe5fa5a23"
+    },
+    {
+      "path": "packages/voice/src/playback.ts",
+      "before": null,
+      "after": "217f116217533ba5103fb626c0ddf2d5d2b4a383449cae84f25bdef7cb1b10e2"
+    },
+    {
+      "path": "packages/voice/src/preferences.tsx",
+      "before": null,
+      "after": "eac1e294c45a094a21bf98deec1fe52bbcc3aea814597afb9549e08ab8f35956"
+    },
+    {
+      "path": "packages/voice/src/profiles.ts",
+      "before": null,
+      "after": "5820a9bc8661c589e05b7f38711b30254db7ad1f7d97fcd6ae9c9dc236e3f250"
+    },
+    {
+      "path": "packages/voice/src/routeAdapter.ts",
+      "before": null,
+      "after": "a3927ea7aabc0a9f072448e1891cd8f0090afdd043552fecc8d7c56b85226df0"
+    },
+    {
+      "path": "packages/voice/src/speechIntent.ts",
+      "before": null,
+      "after": "7d9249db2e87f1116317d9c547da10807f36ac2e8c504b18b50c99ad794f400b"
+    },
+    {
+      "path": "packages/voice/src/telemetry.ts",
+      "before": null,
+      "after": "75bb44c958528a68c89c683bd37a5fdc60d174d59f974810c78bf68ee236294c"
+    },
+    {
+      "path": "packages/voice/src/types.ts",
+      "before": null,
+      "after": "2f9f1ef62d36b77371581660a127e8e2e8bc94aa2d4a728b21f411db504ff0e0"
+    },
+    {
+      "path": "packages/voice/src/useVoice.ts",
+      "before": "ae92b5f031c8aaa295f2e442537f47c2e4fdf9fc3b91e763045eda43c498576f",
+      "after": "c1f4233cdf2d5269b354d00dee8755489af22be455cf605d4efc4f5e7be28ce1"
+    },
+    {
+      "path": "packages/voice/src/voiceCapture.ts",
+      "before": null,
+      "after": "abe5a7fbf9a922a3941baed51eb99c9a7fb2ad9c2e5c146c9f46c9a8938389f1"
+    },
+    {
+      "path": "packages/voice/src/voicePacks.ts",
+      "before": null,
+      "after": "0ec540df5af4de47a2e65d1023a85fb0b12ad15bd131b3be9e5476242c08dc49"
+    },
+    {
+      "path": "packages/voice/src/voiceUpload.ts",
+      "before": null,
+      "after": "b041eedb3c647abdcf4e48b2716a7b19925a78ab5e5acb6ea3d423c2684966ea"
+    },
+    {
+      "path": "scripts/evaluate-voice-corpus.ts",
+      "before": null,
+      "after": "612b403ae6f054037241733a3ddbabf9c29d14b3c2092c7833ecdfeda7946bc8"
+    },
+    {
+      "path": "tests/voice-evaluation.test.ts",
+      "before": null,
+      "after": "f266b274ab2eb0d07f268f2f1607918755bdc46c043d54c499a296b9a0b5e459"
+    },
+    {
+      "path": "tests/voice-geo-api.test.ts",
+      "before": null,
+      "after": "d6b701eee795d20f52bcd55f030a0c1e04d0bb1b5ef1fe71e66ef97ab0c5845c"
+    },
+    {
+      "path": "tests/voice-navigation.test.ts",
+      "before": null,
+      "after": "7c79f6f16d90d977e4276db5fecac0f126d66dcee3429cacc9b5565a8a3c7c3b"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+import { VOICE_PROFILES } from "@pepo/voice/profiles";
+import { openAISpeechProvider, SpeechProviderError } from "./providers";
 import multer from "multer";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
@@ -36,6 +38,24 @@ export function register_voice({ app, store }: RouteContext) {
   app.get("/api/voice/status", (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.json({ enabled: enabled && Boolean(key) && limit > 0 });
+  });
+  app.get("/api/voice/capabilities", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.json({
+      provider: "openai",
+      enabled: enabled && Boolean(key) && limit > 0,
+      streaming: false,
+      profiles: VOICE_PROFILES.map((p) => ({
+        ...p,
+        transcriptionEnabled:
+          enabled &&
+          Boolean(key) &&
+          limit > 0 &&
+          (!["lua", "kg", "ktu"].includes(p.language) ||
+            process.env.PEPO_VOICE_EXPERIMENTAL_LANGUAGES === "true"),
+        qualityMeasured: false,
+      })),
+    });
   });
   store.db.exec(
     "CREATE TABLE IF NOT EXISTS voice_ai_budget(day TEXT PRIMARY KEY,calls INTEGER NOT NULL DEFAULT 0)",
@@ -94,12 +114,10 @@ export function register_voice({ app, store }: RouteContext) {
       upload(req, res, (error) => {
         if (error) {
           debug(req as AuthRequest, "VOICE_UPLOAD_INVALID");
-          res
-            .status(400)
-            .json({
-              code: "VOICE_AUDIO_INVALID",
-              error: "Audio invalide ou trop volumineux (1 Mo maximum).",
-            });
+          res.status(400).json({
+            code: "VOICE_AUDIO_INVALID",
+            error: "Audio invalide ou trop volumineux (1 Mo maximum).",
+          });
         } else next();
       });
     },
@@ -113,12 +131,24 @@ export function register_voice({ app, store }: RouteContext) {
       res.on("close", cancel);
       try {
         const parsed = z
-          .object({ city, language: z.enum(["fr", "en", "sw", "ln"]) })
+          .object({
+            city,
+            language: z.enum(["fr", "en", "sw", "ln", "lua", "kg", "ktu"]),
+          })
           .strict()
           .safeParse(req.body);
         if (!parsed.success)
           throw new ApiError(400, "Ville ou langue invalide.");
         const input = parsed.data;
+        if (
+          ["lua", "kg", "ktu"].includes(input.language) &&
+          process.env.PEPO_VOICE_EXPERIMENTAL_LANGUAGES !== "true"
+        )
+          throw new VoiceError(
+            422,
+            "VOICE_LANGUAGE_UNAVAILABLE",
+            "Cette langue vocale est encore en préparation.",
+          );
         const file = req.file;
         const audio = file && audioDuration(file.buffer);
         if (!audio || audio.seconds < 0.35 || audio.seconds > 15)
@@ -151,68 +181,35 @@ export function register_voice({ app, store }: RouteContext) {
             429,
             "Le quota vocal du jour est atteint. Vous pouvez écrire votre destination.",
           );
-        const body = new FormData();
-        body.append("model", model);
-        body.append(
-          "file",
-          new Blob([new Uint8Array(file!.buffer)], { type: audio.mime }),
-          audio.name,
-        );
-        // Language is a hint, never a translation instruction. Preserve local names.
-        // Only official parameters common to the configurable transcription models.
-        body.append(
-          "prompt",
-          `Destination in ${input.city}, Congo. Language hint: ${input.language}. Transcribe only what is spoken; do not invent speech from silence. Local spellings: ${places
-            .flatMap((p) => [p.name, ...(p.aliases || []).slice(0, 2)])
-            .join(", ")
-            .slice(0, 1600)}`,
-        );
         debug(req, "VOICE_PROVIDER_STARTED");
         const providerStarted = Date.now();
-        const response = await fetch(
-          "https://api.openai.com/v1/audio/transcriptions",
-          {
-            method: "POST",
-            headers: { Authorization: `Bearer ${key}` },
-            body,
+        let result: { text: string };
+        try {
+          result = await openAISpeechProvider(key!, model).transcribe({
+            audio: new Uint8Array(file!.buffer),
+            mime: audio.mime,
+            filename: audio.name,
+            language: input.language,
             signal: controller.signal,
-          },
-        );
+            context: `Local spellings: ${places
+              .flatMap((p) => [p.name, ...(p.aliases || []).slice(0, 2)])
+              .join(", ")
+              .slice(0, 1600)}`,
+          });
+        } catch (error) {
+          if (error instanceof SpeechProviderError)
+            throw new VoiceError(
+              error.status === 429 ? 429 : 503,
+              error.code,
+              "Le service vocal est momentanément indisponible.",
+            );
+          throw error;
+        }
         debug(req, "VOICE_PROVIDER_RESPONSE", {
-          status: response.status,
           elapsedMs: Date.now() - providerStarted,
         });
-        if (!response.ok) {
-          // Never log the provider body: it may echo submitted audio or prompt data.
-          const code =
-            response.status === 401 || response.status === 403
-              ? "VOICE_PROVIDER_AUTH"
-              : response.status === 404
-                ? "VOICE_PROVIDER_MODEL"
-                : response.status === 429
-                  ? "VOICE_PROVIDER_QUOTA"
-                  : "VOICE_PROVIDER_ERROR";
-          console.warn("[pepo-voice]", code, {
-            status: response.status,
-            requestId: response.headers.get("x-request-id"),
-          });
-          throw new VoiceError(
-            response.status === 429 ? 429 : 503,
-            code,
-            "Le service vocal est momentanément indisponible.",
-          );
-        }
-        const result = z
-          .object({ text: z.string().trim().min(1).max(300) })
-          .safeParse(await response.json());
-        if (!result.success)
-          throw new VoiceError(
-            503,
-            "VOICE_EMPTY_TRANSCRIPT",
-            "La phrase n’a pas été comprise. Réessayez.",
-          );
         if (controller.signal.aborted) throw new Error("timeout");
-        res.json({ text: result.data.text });
+        res.json({ text: result.text });
       } catch (error) {
         if (res.destroyed) return;
         const status = error instanceof ApiError ? error.status : 503;

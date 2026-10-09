@@ -1,0 +1,27 @@
+{
+  "name": "@pepo/voice",
+  "version": "1.2.0",
+  "private": true,
+  "exports": {
+    "./VoiceButton": "./src/VoiceButton.tsx",
+    "./useVoice": "./src/useVoice.ts",
+    "./commands": "./src/commands.ts",
+    "./navigation": "./src/navigation.ts"
+  },
+  "dependencies": {
+    "@pepo/types": "1.2.0",
+    "@pepo/i18n": "1.2.0",
+    "expo-speech": "~57.0.3",
+    "expo-speech-recognition": "57.1.0",
+    "expo-constants": "~57.0.20",
+    "lucide-react-native": "^1.48.0"
+  },
+  "peerDependencies": {
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "expo": "~57.0.26"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

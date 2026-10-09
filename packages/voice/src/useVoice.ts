@@ -1,14 +1,29 @@
+import { VOICE_PROFILES, type VoiceLanguage } from "./profiles";
 import { useI18n } from "@pepo/i18n/Context";
 import type { TranslationKey } from "@pepo/i18n/catalog";
 import { chooseSpeechLocale } from "@pepo/i18n/locale";
 import Constants from "expo-constants";
 import * as Speech from "expo-speech";
-import { useEffect,useRef,useState } from "react";
-import { AppState,Platform } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { AppState, Platform } from "react-native";
 type Recognition =
   typeof import("expo-speech-recognition").ExpoSpeechRecognitionModule;
-export function useVoice(onResult?: (text: string) => void) {
-  const { language, t } = useI18n();
+export function useVoice(
+  onResult?: (text: string) => void,
+  selectedLanguage?: VoiceLanguage,
+) {
+  const { language: interfaceLanguage, t } = useI18n();
+  const language = selectedLanguage || interfaceLanguage;
+  const chooseLocale = (locales: string[], lang: VoiceLanguage) => {
+    if (["fr", "en", "sw", "ln"].includes(lang))
+      return chooseSpeechLocale(locales, lang as "fr" | "en" | "sw" | "ln");
+    const profile = VOICE_PROFILES.find((p) => p.language === lang);
+    return (
+      locales.find((l) => profile?.locales.includes(l.replaceAll("_", "-"))) ||
+      null
+    );
+  };
+  const [transcriptText, setTranscriptText] = useState("");
   const [listening, setListening] = useState(false),
     [message, setMessage] = useState("");
   const module = useRef<Recognition | null>(null),
@@ -57,6 +72,7 @@ export function useVoice(onResult?: (text: string) => void) {
     if (busy.current) return;
     busy.current = true;
     setMessage("");
+    setTranscriptText("");
     const token = ++generation.current;
     const current = () => alive.current && token === generation.current;
     try {
@@ -73,7 +89,7 @@ export function useVoice(onResult?: (text: string) => void) {
       try {
         const supported = await m.getSupportedLocales({});
         inventoryKnown = supported.locales.length > 0;
-        locale = chooseSpeechLocale(supported.locales, language);
+        locale = chooseLocale(supported.locales, language);
       } catch {}
       if (!current()) return;
       // Web and older Android do not expose locale inventories. Never guess Swahili or Lingala.
@@ -101,6 +117,7 @@ export function useVoice(onResult?: (text: string) => void) {
         }),
         m.addListener("result", (e) => {
           transcript = e.results[0]?.transcript || "";
+          if (current()) setTranscriptText(transcript);
           if (e.isFinal) deliver();
         }),
         m.addListener("error", () => fail("voiceNotUnderstood")),
@@ -113,7 +130,7 @@ export function useVoice(onResult?: (text: string) => void) {
       m.start({
         lang: locale,
         continuous: false,
-        interimResults: false,
+        interimResults: true,
         maxAlternatives: 1,
       });
       timeout.current = setTimeout(() => {
@@ -130,7 +147,7 @@ export function useVoice(onResult?: (text: string) => void) {
     try {
       const voices = await Speech.getAvailableVoicesAsync();
       if (!alive.current || generation.current !== token) return;
-      const locale = chooseSpeechLocale(
+      const locale = chooseLocale(
         voices.map((v) => v.language),
         language,
       );
@@ -152,5 +169,14 @@ export function useVoice(onResult?: (text: string) => void) {
       if (alive.current) setMessage(t("voiceUnavailable"));
     }
   }
-  return { start, stop, speak, listening, message };
+  const finish = () => module.current?.stop();
+  return {
+    start,
+    stop,
+    finish,
+    speak,
+    listening,
+    message,
+    transcript: transcriptText,
+  };
 }

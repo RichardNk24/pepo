@@ -1,3 +1,4 @@
+import { VoicePreferencesProvider } from "@pepo/voice/preferences";
 import { DMSans_400Regular } from "@expo-google-fonts/dm-sans/400Regular";
 import { DMSans_500Medium } from "@expo-google-fonts/dm-sans/500Medium";
 import { DMSans_600SemiBold } from "@expo-google-fonts/dm-sans/600SemiBold";
@@ -52,30 +53,32 @@ export default function Layout() {
           <LocationProvider>
             <AppProvider>
               <LiveRideActivityBridge />
-              <UIProvider>
-                <StatusBar style="dark" />
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: C.paper },
-                    animation: "slide_from_right",
-                  }}
-                >
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="onboarding" />
-                  <Stack.Screen name="ride" />
-                  <Stack.Screen name="messages" />
-                  <Stack.Screen name="documents" />
-                  <Stack.Screen
-                    name="account-safety"
-                    options={{ presentation: "modal" }}
-                  />
-                  <Stack.Screen
-                    name="help"
-                    options={{ presentation: "modal" }}
-                  />
-                </Stack>
-              </UIProvider>
+              <VoicePreferencesProvider>
+                <UIProvider>
+                  <StatusBar style="dark" />
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: C.paper },
+                      animation: "slide_from_right",
+                    }}
+                  >
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="onboarding" />
+                    <Stack.Screen name="ride" />
+                    <Stack.Screen name="messages" />
+                    <Stack.Screen name="documents" />
+                    <Stack.Screen
+                      name="account-safety"
+                      options={{ presentation: "modal" }}
+                    />
+                    <Stack.Screen
+                      name="help"
+                      options={{ presentation: "modal" }}
+                    />
+                  </Stack>
+                </UIProvider>
+              </VoicePreferencesProvider>
             </AppProvider>
           </LocationProvider>
         </View>

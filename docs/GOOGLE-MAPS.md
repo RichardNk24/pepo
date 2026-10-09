@@ -39,7 +39,7 @@ Une clé qui active uniquement « Maps SDK for iOS » ou l’ancienne « Directi
 
 Utilise **deux clés du même projet Google**, avec des restrictions adaptées :
 
-- **Clé d’affichage** : limitée à Maps JavaScript API, avec restriction « Sites Web ». Autorise l’adresse où le serveur affiche la carte, par exemple `http://192.168.11.100:4000/*`. Pour tester le navigateur du PC, ajoute `http://localhost:4000/*` et `http://127.0.0.1:4000/*`. Remplace cette IP par celle de ton PC.
+- **Clé d’affichage** : limitée à Maps JavaScript API, avec restriction « Sites Web ». Autorise l’adresse où le serveur affiche la carte, par exemple `http://192.168.11.104:4000/*`. Pour tester le navigateur du PC, ajoute `http://localhost:4000/*` et `http://127.0.0.1:4000/*`. Remplace cette IP par celle de ton PC.
 - **Clé serveur** : limitée à Routes API, Places API (New) et Geocoding API. En production, restreins-la à l’IP publique du serveur. Les restrictions par référent web ou bundle iOS ne conviennent pas aux appels Node du serveur. L’IP locale `192.168...` n’est pas l’IP publique de sortie.
 
 Les changements de restrictions peuvent demander quelques minutes pour prendre effet. Ne colle pas ta clé serveur dans un champ `EXPO_PUBLIC_*` ni dans un message. Ces champs sont intégrés au code de l’application et sont publics.
@@ -50,7 +50,7 @@ Dans **`apps/rider/.env`** :
 
 ```dotenv
 EXPO_PUBLIC_API_URL=
-EXPO_PUBLIC_MAPS_API_URL=http://192.168.11.100:4000
+EXPO_PUBLIC_MAPS_API_URL=http://192.168.11.104:4000
 EXPO_PUBLIC_MAP_RENDERER=google
 ```
 
@@ -62,7 +62,7 @@ Dans **`apps/api/.env`** :
 PORT=4000
 NODE_ENV=development
 DEV_AUTH=true
-PUBLIC_URL=http://192.168.11.100:4000
+PUBLIC_URL=http://192.168.11.104:4000
 GOOGLE_MAPS_WEB_KEY=TA_CLE_AFFICHAGE
 GOOGLE_MAPS_SERVER_KEY=TA_CLE_SERVEUR
 ```
@@ -79,7 +79,7 @@ Dans le **premier terminal**, toujours dans le dossier `pepo` :
 npm.cmd run server
 ```
 
-Laisse-le ouvert. Sur Safari de l’iPhone, ouvre `http://192.168.11.100:4000/health` : un résultat `ok` confirme que le téléphone atteint le serveur. Remplace l’IP par celle de ton PC. Autorise Node sur le réseau privé dans le pare-feu Windows si nécessaire.
+Laisse-le ouvert. Sur Safari de l’iPhone, ouvre `http://192.168.11.104:4000/health` : un résultat `ok` confirme que le téléphone atteint le serveur. Remplace l’IP par celle de ton PC. Autorise Node sur le réseau privé dans le pare-feu Windows si nécessaire.
 
 Dans le **second terminal** :
 

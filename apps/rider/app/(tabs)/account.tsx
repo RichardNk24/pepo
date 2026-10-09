@@ -129,6 +129,19 @@ export default function Account() {
           gap: 22,
         }}
       >
+        <Button
+          title="Voix et navigation"
+          kind="secondary"
+          onPress={() => router.push("/voice-settings")}
+        />
+        {__DEV__ ? (
+          <Button
+            title="Pepo Voice Intelligence Lab"
+            kind="secondary"
+            onPress={() => router.push("/voice-lab")}
+          />
+        ) : null}
+
         <View style={[s.card, { padding: 18, gap: 16 }]}>
           <View style={[s.row, { gap: 16 }]}>
             <AccountPhoto onPress={() => setPanel("photo")} />

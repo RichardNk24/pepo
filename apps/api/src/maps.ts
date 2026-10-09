@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { decodeSteps } from "@pepo/voice/routeAdapter";
 import type { CityId, Place, Point, Route } from "@pepo/types/model";
 import { CITIES, PLACES } from "@pepo/utils/cities";
 import { validPoint } from "@pepo/utils/mapGeometry";
@@ -285,7 +287,7 @@ export async function computeRoute(
         "Content-Type": "application/json",
         "X-Goog-Api-Key": key,
         "X-Goog-FieldMask":
-          "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline" +
+          "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.steps.startLocation,routes.legs.steps.endLocation,routes.legs.steps.distanceMeters,routes.legs.steps.polyline.encodedPolyline,routes.legs.steps.navigationInstruction" +
           (optimize ? ",routes.optimizedIntermediateWaypointIndex" : ""),
       },
       body: JSON.stringify({
@@ -345,6 +347,8 @@ export async function computeRoute(
     }
   }
   return {
+    navigationSteps: decodeSteps(r.legs, decodePolyline),
+    navigationVersion: `google-${calculatedAt}-${createHash("sha256").update(r.polyline.encodedPolyline).digest("hex").slice(0, 16)}`,
     orderedStops,
     stopOrderSource: optimize ? "google" : "manual",
     points,

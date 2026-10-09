@@ -80,7 +80,9 @@ export function register_map_search(ctx: RouteContext) {
         .object({
           query: z.string().trim().min(2).max(300),
           city,
-          language: z.enum(["fr", "en", "sw", "ln"]).default("fr"),
+          language: z
+            .enum(["fr", "en", "sw", "ln", "lua", "kg", "ktu"])
+            .default("fr"),
           allowAi: z.boolean().default(false),
         })
         .strict()

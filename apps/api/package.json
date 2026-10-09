@@ -21,6 +21,7 @@
     "@pepo/types": "1.2.0",
     "@pepo/utils": "1.2.0",
     "@pepo/maps": "1.2.0",
-    "@pepo/i18n": "1.2.0"
+    "@pepo/i18n": "1.2.0",
+    "@pepo/voice": "1.2.0"
   }
 }

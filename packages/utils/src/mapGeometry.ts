@@ -1,7 +1,8 @@
-import type { Point,Route } from "@pepo/types/model";
+import type { Point, Route } from "@pepo/types/model";
 import { haversine } from "./rules";
 
 export type LocationFix = Point & {
+  speed?: number;
   accuracy: number | null;
   timestamp: number;
 };

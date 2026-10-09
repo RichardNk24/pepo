@@ -1,3 +1,7 @@
+import {
+  registerVoiceNavigation,
+  registerVoiceGeoAdmin,
+} from "./voice/navigationRoutes";
 import { RuleError } from "@pepo/utils/rules";
 import express, {
   type NextFunction,
@@ -54,6 +58,7 @@ export function createApp(store: Store, config: ServerConfig) {
   app.use("/api/admin", admin);
   register_admin(ctx);
   registerSafetyAdmin(ctx);
+  registerVoiceGeoAdmin(ctx);
 
   app.use(
     "/api/maps",
@@ -83,6 +88,7 @@ export function createApp(store: Store, config: ServerConfig) {
   register_map_search(ctx);
   register_personalized_places(ctx);
   register_voice(ctx);
+  registerVoiceNavigation(ctx);
   registerSafety(ctx);
   register_trips(ctx);
   register_support(ctx);

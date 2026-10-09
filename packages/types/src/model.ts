@@ -149,6 +149,9 @@ export type TripStatus =
   | "completed"
   | "cancelled";
 export type Route = {
+  /** Provider step geometry; missing on old/estimated routes. */
+  navigationSteps?: RouteNavigationStep[];
+  navigationVersion?: string;
   points: Point[];
   distanceKm: number;
   durationMin: number;
@@ -270,4 +273,27 @@ export type TripSafetyState = {
     acknowledgedAt?: number;
   };
   supportPhone?: string;
+};
+
+export type RouteManeuver =
+  | "left"
+  | "right"
+  | "straight"
+  | "slight-left"
+  | "slight-right"
+  | "uturn-left"
+  | "uturn-right"
+  | "roundabout-left"
+  | "roundabout-right"
+  | "merge"
+  | "unknown"
+  | "arrive";
+export type RouteNavigationStep = {
+  id: string;
+  start: Point;
+  end: Point;
+  points: Point[];
+  distanceMeters: number;
+  maneuver: RouteManeuver;
+  providerText: string;
 };
