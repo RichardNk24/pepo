@@ -37,13 +37,7 @@ export function DestinationSpeechButton({
   onResult,
   onBusyChange,
   onFeedback,
-  recordingTarget,
 }: {
-  recordingTarget?: {
-    key: string;
-    prepare: () => Promise<void>;
-    upload: (uri: string, signal: AbortSignal) => Promise<string>;
-  };
   onResult: (text: string) => void;
   onBusyChange?: (busy: boolean) => void;
   onFeedback?: (feedback: {
@@ -95,11 +89,8 @@ export function DestinationSpeechButton({
       {
         prepare: async () => {
           if (!LIVE || app.demo) throw new Error("demo");
-          if (recordingTarget) await recordingTarget.prepare();
-          else {
-            const status = await api<{ enabled: boolean }>("/voice/status");
-            if (!status.enabled) throw new Error("voice-disabled");
-          }
+          const status = await api<{ enabled: boolean }>("/voice/status");
+          if (!status.enabled) throw new Error("voice-disabled");
           const previous = audioLease;
           audioLease = new Promise<void>((resolve) => {
             releaseAudio = resolve;
@@ -145,15 +136,6 @@ export function DestinationSpeechButton({
           const info = await FileSystem.getInfoAsync(uri);
           if (!info.exists || !info.size || info.size > 1024 * 1024)
             throw new Error("empty-audio");
-          if (recordingTarget) {
-            try {
-              return await recordingTarget.upload(uri, signal);
-            } catch (error) {
-              if (error instanceof VoiceUploadError)
-                throw new RequestError(error.code, error.status, error.code);
-              throw error;
-            }
-          }
           const trace =
             Date.now().toString(36) +
             "-" +
@@ -263,13 +245,7 @@ export function DestinationSpeechButton({
                                       error.status === 400
                                     ? "voiceRecordFailed"
                                     : "voiceRetry";
-          feedback.current = {
-            ...feedback.current,
-            message:
-              recordingTarget && code === "VOICE_CORPUS_DISABLED"
-                ? "Active PEPO_VOICE_CORPUS_ENABLED dans l’API puis redémarre-la."
-                : app.t(key),
-          };
+          feedback.current = { ...feedback.current, message: app.t(key) };
           callbacks.current.onFeedback?.(feedback.current);
           // Only a safe diagnostic code/status, never audio, transcripts or keys.
           if (__DEV__)
@@ -295,15 +271,7 @@ export function DestinationSpeechButton({
       callbacks.current.onBusyChange?.(false);
       void session.cancel();
     };
-  }, [
-    recorder,
-    app.settings.city,
-    speechLanguage,
-    app.demo,
-    recordingTarget?.key,
-    app.profile?.id,
-    app.profile?.role,
-  ]);
+  }, [recorder, app.settings.city, speechLanguage, app.demo]);
   const recording = phase === "recording",
     busy = phase !== "idle" && !recording;
   return (

@@ -1,0 +1,105 @@
+{
+  "patch": "Pepo-Swahili-Katanga",
+  "files": [
+    {
+      "path": "apps/api/src/app.ts",
+      "before": "b79939c896734fc25debcec2b521e692d0724b88fa0f4ee86d8311d9a05c64c8",
+      "after": "f818804af62490c1c6908d6c78a32a3ffca8bd3f2040413f7f451fc53aa69b4c"
+    },
+    {
+      "path": "apps/api/src/voice/budget.ts",
+      "before": null,
+      "after": "6a330c95497e2fea3742a1aaad9f08f8a7ecb884c08a1c2adedcabeac50c032c"
+    },
+    {
+      "path": "apps/api/src/voice/corpusRoutes.ts",
+      "before": null,
+      "after": "d00f65d08030e582fe43842d9b455683c86994a06cf4923a32a36f560891229d"
+    },
+    {
+      "path": "apps/api/src/voice/providers.ts",
+      "before": "893fbfd7662a58cac25c4b43e3a92f904930b855f7973f054e2e0a3a6b360acf",
+      "after": "547dcadcf9b15b7e2a530a093cfffa0846a54a37f46e9daa75c7dc6f8d6e3806"
+    },
+    {
+      "path": "apps/api/src/voice/routes.ts",
+      "before": "54e4b9ab248807be838028c85a5f0f2c17e683e272796b0c3c521de49570c3b5",
+      "after": "f3ce50df6f6ecd05ddd3f939b3b013c16ab53bc1752ba26d84f3706c64372a76"
+    },
+    {
+      "path": "apps/driver/app/voice-corpus.tsx",
+      "before": null,
+      "after": "843eafd9d1ec95005c3a2ce88583f70ffa165eb05de5b8ec0ebfa35dc455b8fa"
+    },
+    {
+      "path": "apps/rider/app/voice-corpus.tsx",
+      "before": null,
+      "after": "843eafd9d1ec95005c3a2ce88583f70ffa165eb05de5b8ec0ebfa35dc455b8fa"
+    },
+    {
+      "path": "docs/PEPO-SWAHILI-KATANGA.md",
+      "before": null,
+      "after": "c29814045811330bcfd5bf4cb54338c4e6a0e1c67b6927ff72eaf10e3500586d"
+    },
+    {
+      "path": "docs/VALIDATION-SWAHILI-KATANGA.md",
+      "before": null,
+      "after": "4e70af292665448357b2000249b2f1a72e703bdfd3d19fe93721541a7401ddc0"
+    },
+    {
+      "path": "packages/api-client/src/api.ts",
+      "before": "3454d561231458201eec9b7d62430eac10d1caf45bf79ee8c0cfc8de9b0ef1e5",
+      "after": "cd18e3d6cc1efeebdddb41062eb982b16fc2e046cfaf9f5df6ea16f483167f11"
+    },
+    {
+      "path": "packages/voice/package.json",
+      "before": "f762f9349c9b1e001f8cac32e83a7b8cd8fbee905307074f48b216f331cd316e",
+      "after": "f400a3cc3f34536fed8195fe966e6e8336706599e0048c791db8fc25735f18c0"
+    },
+    {
+      "path": "packages/voice/src/CorpusAudio.tsx",
+      "before": null,
+      "after": "5f04b4c398b391d3128c8eae895d7dbdf954d05b8fc158266eca1ace28e5dd84"
+    },
+    {
+      "path": "packages/voice/src/CorpusAudio.web.tsx",
+      "before": null,
+      "after": "cc7c07dae0f77e764bdbbb91d63b5ce0af911f4e26b1a687d4e352fe26543767"
+    },
+    {
+      "path": "packages/voice/src/DestinationSpeechButton.tsx",
+      "before": "54dd49a3fd05e11dfffaf6f01d3686d2a30130ddd8863f6e729cc77c0c6028e7",
+      "after": "4847fb27e6d4db1d6a5e08693e754ca3b5a6754a78dfe69e4bb1164d509313ec"
+    },
+    {
+      "path": "packages/voice/src/DestinationSpeechButton.web.tsx",
+      "before": "429a15e2eba4c21dbaa7642d83bf1c7caea6a9fb963c7e817269b3c7a26b0332",
+      "after": "49912883e29b014ed544abcbd3c6450e6f77a93cbb52893bb3cf2cd870c9df1e"
+    },
+    {
+      "path": "packages/voice/src/VoiceCorpus.tsx",
+      "before": null,
+      "after": "b5fabdee8bab1fe021842826baf2bc5c501dc2d4dee85c7ad9dfbec184ac036f"
+    },
+    {
+      "path": "packages/voice/src/VoiceLab.tsx",
+      "before": "da1c2a8ee68564e3a9c6900020c6ced134d4453db502e370ffa28b2fe5017b1d",
+      "after": "c3087d25722f4e801740010b38b9368cf8799bfdd664c0ca077a13c38dd7c571"
+    },
+    {
+      "path": "packages/voice/src/corpus.ts",
+      "before": null,
+      "after": "fc5a93b51037c6faca18384ba8748c23b218f445ad2b5bca28475362e0e4d1a8"
+    },
+    {
+      "path": "scripts/export-voice-corpus.ts",
+      "before": null,
+      "after": "1aa1768186b1f49ee18c696d815ff1989dab0419358bed61c4f794d4764256d7"
+    },
+    {
+      "path": "tests/voice-corpus.test.ts",
+      "before": null,
+      "after": "52c45c4489bad70f23e2cde827712e0232be0ad2b4d59528bae977b3cda73833"
+    }
+  ]
+}

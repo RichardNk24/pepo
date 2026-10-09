@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, View, Platform } from "react-native";
 import { useApp } from "@pepo/session/AppProvider";
@@ -219,11 +218,6 @@ function VoiceLabContent() {
         <Tag tone="yellow">
           Laboratoire · simulations séparées des trajets réels
         </Tag>
-        <Button
-          title="Enregistrer le swahili du Katanga"
-          kind="yellow"
-          onPress={() => router.push("/voice-corpus")}
-        />
         <Txt variant="h3">{profile.label}</Txt>
         <Txt>{capability}</Txt>
         <Field

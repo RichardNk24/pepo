@@ -5,7 +5,6 @@ export type TranscriptionInput = {
   filename: string;
   language: VoiceLanguage;
   context: string;
-  purpose?: "corpus";
   signal: AbortSignal;
 };
 /** A replacement adapter must preserve transcription, cancellation and error contracts. */
@@ -38,7 +37,7 @@ export function openAISpeechProvider(
       );
       body.append(
         "prompt",
-        `${input.purpose === "corpus" ? "Speech sample in Congo." : "Destination in Congo."} Language hint: ${input.language}. Transcribe only what is spoken, preserving mixed languages and local names; do not invent speech from silence. ${input.context.slice(0, 1600)}`,
+        `Destination in Congo. Language hint: ${input.language}. Transcribe only what is spoken, preserving mixed languages and local names; do not invent speech from silence. ${input.context.slice(0, 1600)}`,
       );
       const response = await fetcher(
         "https://api.openai.com/v1/audio/transcriptions",

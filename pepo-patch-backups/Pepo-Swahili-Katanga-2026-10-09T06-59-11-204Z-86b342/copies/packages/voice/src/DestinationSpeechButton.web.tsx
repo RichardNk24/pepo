@@ -9,13 +9,7 @@ export function DestinationSpeechButton({
   onResult,
   onBusyChange,
   onFeedback,
-  recordingTarget,
 }: {
-  recordingTarget?: {
-    key: string;
-    prepare: () => Promise<void>;
-    upload: (uri: string, signal: AbortSignal) => Promise<string>;
-  };
   onResult: (text: string) => void;
   onBusyChange?: (busy: boolean) => void;
   onFeedback?: (value: {
@@ -39,10 +33,6 @@ export function DestinationSpeechButton({
       message: voice.message,
     });
   }, [voice.listening, voice.message]);
-  if (recordingTarget)
-    return (
-      <Text>Enregistre les exemples dans Pepo sur iPhone ou Android.</Text>
-    );
   return (
     <View style={{ width: 158 }}>
       <Pressable

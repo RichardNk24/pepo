@@ -12,7 +12,6 @@ import {
 } from "../runtime";
 import { localLandmarks } from "../landmarks";
 import { withLocalAliases } from "../map-search/aliases";
-import { acquireVoiceSlot, reserveVoiceBudget } from "./budget";
 import { audioDuration } from "./audio";
 
 class VoiceError extends ApiError {
@@ -34,7 +33,7 @@ export function register_voice({ app, store }: RouteContext) {
     0,
     Math.min(1000, Number(process.env.PEPO_VOICE_DAILY_CALL_LIMIT ?? 20) || 0),
   );
-
+  let active = 0;
   // Authenticated preflight; no provider call and no budget consumption.
   app.get("/api/voice/status", (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
@@ -123,7 +122,7 @@ export function register_voice({ app, store }: RouteContext) {
       });
     },
     wrap(async (req, res) => {
-      let release: (() => void) | undefined;
+      let acquired = false;
       const controller = new AbortController();
       const cancel = () => {
         if (!res.writableEnded) controller.abort();
@@ -161,10 +160,27 @@ export function register_voice({ app, store }: RouteContext) {
           bytes: file!.size,
           seconds: Math.round(audio.seconds * 10) / 10,
         });
-        release = acquireVoiceSlot(store);
+        if (active >= 2)
+          throw new ApiError(
+            429,
+            "Le micro est occupé. Réessayez dans un instant.",
+          );
+        active++;
+        acquired = true;
         const places = withLocalAliases(await localLandmarks(input.city));
         if (controller.signal.aborted) throw new Error("cancelled");
-        reserveVoiceBudget(store, limit);
+        const day = new Date().toISOString().slice(0, 10);
+        store.db.prepare("DELETE FROM voice_ai_budget WHERE day < ?").run(day);
+        const allowed = store.db
+          .prepare(
+            "INSERT INTO voice_ai_budget(day,calls) SELECT ?,1 WHERE ? > 0 ON CONFLICT(day) DO UPDATE SET calls=calls+1 WHERE calls < ? RETURNING calls",
+          )
+          .get(day, limit, limit);
+        if (!allowed)
+          throw new ApiError(
+            429,
+            "Le quota vocal du jour est atteint. Vous pouvez écrire votre destination.",
+          );
         debug(req, "VOICE_PROVIDER_STARTED");
         const providerStarted = Date.now();
         let result: { text: string };
@@ -217,7 +233,7 @@ export function register_voice({ app, store }: RouteContext) {
               : "La phrase n’a pas pu être transcrite. Réessayez ou écrivez votre destination.",
         });
       } finally {
-        release?.();
+        if (acquired) active--;
         clearTimeout(timer);
         res.off("close", cancel);
         req.file?.buffer.fill(0);

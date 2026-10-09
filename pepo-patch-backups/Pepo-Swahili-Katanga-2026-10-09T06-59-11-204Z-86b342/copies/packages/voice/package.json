@@ -26,10 +26,7 @@
     "./nativeOutput": "./src/nativeOutput.ts",
     "./VoiceSettings": "./src/VoiceSettings.tsx",
     "./VoiceLab": "./src/VoiceLab.tsx",
-    "./TripNavigation": "./src/TripNavigation.tsx",
-    "./corpus": "./src/corpus.ts",
-    "./evaluation": "./src/evaluation.ts",
-    "./VoiceCorpus": "./src/VoiceCorpus.tsx"
+    "./TripNavigation": "./src/TripNavigation.tsx"
   },
   "dependencies": {
     "@pepo/types": "1.2.0",
