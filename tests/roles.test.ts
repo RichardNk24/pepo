@@ -199,6 +199,70 @@ describe("One identity with independent Rider and Driver sessions", () => {
     expect(payments.mobileMoney.enabled).toBe(false);
     expect(payments.card.enabled).toBe(false);
   });
+  it("uses only fresh H3-indexed driver positions for spatial dispatch and removes them when offline", async () => {
+    const d = await login("driver", "+243842123457");
+    store.saveUser({
+      ...d.profile,
+      online: true,
+      verification: "verified",
+      driver: {
+        vehicle: "moto",
+        model: "Haojue",
+        plate: "LSH GPS 01",
+        helmet: true,
+      },
+    });
+    const driverToken = d.token;
+    const fixTime = Date.now();
+    await request(app)
+      .post("/api/me/location")
+      .set(auth(driverToken))
+      .send({
+        latitude: PLACES[0].latitude,
+        longitude: PLACES[0].longitude,
+        accuracy: 12,
+        capturedAt: fixTime,
+      })
+      .expect(202, { accepted: true });
+
+    const rider = await login("passenger", "+243842123458");
+    const trip = (
+      await request(app)
+        .post("/api/trips")
+        .set(auth(rider.token))
+        .send({
+          pickup: PLACES[0],
+          destination: PLACES[2],
+          vehicle: "moto",
+          proposedPrice: 5000,
+        })
+        .expect(201)
+    ).body as Trip;
+    expect(availableDriverIds(store, trip, fixTime + 1000)).toContain(
+      d.profile.id,
+    );
+
+    store.db
+      .prepare("UPDATE driver_positions SET capturedAt=? WHERE userId=?")
+      .run(fixTime - 60_000, d.profile.id);
+    expect(availableDriverIds(store, trip, fixTime + 1000)).not.toContain(
+      d.profile.id,
+    );
+
+    store.db
+      .prepare("UPDATE driver_positions SET capturedAt=? WHERE userId=?")
+      .run(fixTime, d.profile.id);
+    await request(app)
+      .post("/api/me/online")
+      .set(auth(driverToken))
+      .send({ online: false })
+      .expect(200);
+    expect(
+      store.db
+        .prepare("SELECT userId FROM driver_positions WHERE userId=?")
+        .get(d.profile.id),
+    ).toBeUndefined();
+  });
   it("migrates a legacy database twice without resetting documents, sessions or driver availability", () => {
     const path = join(dir, "legacy.sqlite");
     const legacy = new DatabaseSync(path);

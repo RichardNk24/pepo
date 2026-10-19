@@ -35,6 +35,7 @@ import {
   estimateRoute,
   estimateRouteWithStops,
   fare,
+  haversine,
   suggestedFare,
   validateNewTrip,
 } from "@pepo/utils/rules";
@@ -211,6 +212,11 @@ export function AppProvider({
   const [testAuth, setTestAuth] = useState(
     process.env.EXPO_PUBLIC_DEV_AUTH === "true",
   );
+  const lastDispatchPosition = useRef<{
+    latitude: number;
+    longitude: number;
+    sentAt: number;
+  } | null>(null);
   const saving = useRef(Promise.resolve());
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const refreshing = useRef(false);
@@ -360,6 +366,39 @@ export function AppProvider({
       sub.remove();
     };
   }, [state.profile?.id, refresh]);
+  useEffect(() => {
+    const fix = location.fix;
+    if (
+      !LIVE ||
+      appRole !== "driver" ||
+      !state.profile?.online ||
+      !fix ||
+      !Number.isFinite(fix.accuracy) ||
+      fix.accuracy! > 150 ||
+      Date.now() - fix.timestamp > 45_000
+    )
+      return;
+    const previous = lastDispatchPosition.current;
+    const movedMeters = previous
+      ? haversine(previous, fix) * 1000
+      : Number.POSITIVE_INFINITY;
+    if (previous && Date.now() - previous.sentAt < 12_000 && movedMeters < 35)
+      return;
+    lastDispatchPosition.current = {
+      latitude: fix.latitude,
+      longitude: fix.longitude,
+      sentAt: Date.now(),
+    };
+    void api("/me/location", {
+      method: "POST",
+      body: {
+        latitude: fix.latitude,
+        longitude: fix.longitude,
+        accuracy: fix.accuracy,
+        capturedAt: fix.timestamp,
+      },
+    }).catch(() => {});
+  }, [appRole, LIVE, location.fix, state.profile?.online]);
   const activeTrip = state.trips.find(isActive);
   useEffect(() => {
     if (LIVE || !state.profile) return;
