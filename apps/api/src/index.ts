@@ -1,15 +1,18 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { ExpressAdapter } from "@nestjs/platform-express";
+import express from "express";
 import helmet from "helmet";
 import type { NextFunction, Request, Response } from "express";
 import { resolve } from "node:path";
 import { clearInterval, setInterval } from "node:timers";
 import { ApiModule } from "./nest/api.module";
+import { PostgresService } from "./nest/infrastructure/postgres.service";
+import { lookupPostgresSession } from "./auth/postgres-auth.service";
 import { createApp } from "./app";
 import { openDatabase } from "./database";
 import { attachRealtime } from "./realtime/socket";
-import { isLocalExpoWebOrigin } from "./runtime";
+import { isLocalExpoWebOrigin, type ServerConfig } from "./runtime";
 
 async function bootstrap() {
   const port = Number(process.env.PORT || 4000);
@@ -19,6 +22,9 @@ async function bootstrap() {
     process.env.PEPO_MAP_ASSETS_DIR ||= resolve("dist/map-assets");
   }
   const devAuth = process.env.DEV_AUTH === "true";
+  const authPostgresEnabled = process.env.AUTH_POSTGRES_ENABLED === "true";
+  if (authPostgresEnabled && !process.env.DATABASE_URL)
+    throw new Error("AUTH_POSTGRES_ENABLED=true nécessite DATABASE_URL.");
   if (production && devAuth)
     throw new Error("DEV_AUTH doit être désactivé en production.");
   if (
@@ -63,7 +69,7 @@ async function bootstrap() {
             );
         }
       : undefined;
-  const config = {
+  const config: ServerConfig = {
     devAuth,
     publicUrl: process.env.PUBLIC_URL || `http://localhost:${port}`,
     googleKey: process.env.GOOGLE_MAPS_SERVER_KEY,
@@ -73,6 +79,7 @@ async function bootstrap() {
     dataDir,
     corsOrigins,
     sendSms,
+    authPostgresEnabled,
     safety: {
       supportPhone:
         process.env.SAFETY_SUPPORT_PHONE?.match(/^\+[1-9]\d{7,14}$/)?.[0],
@@ -80,7 +87,7 @@ async function bootstrap() {
   };
   const service = createApp(store, config);
   const app = await NestFactory.create(
-    ApiModule.register(config),
+    ApiModule.register(config, store),
     new ExpressAdapter(),
     { bodyParser: false },
   );
@@ -97,14 +104,26 @@ async function bootstrap() {
           (!production && isLocalExpoWebOrigin(origin)),
       ),
   });
+  // Nest controllers need a JSON parser; legacy routes retain their own
+  // parsers and Express skips a request body that has already been read.
+  app.use(express.json({ limit: "100kb" }));
   // Compatibility bridge: Nest owns HTTP startup while existing routes are
   // migrated one controller at a time. Register it before Nest's fallback
   // handler so legacy API routes do not get swallowed by Nest's 404 route.
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path === "/health") return next();
+    if (authPostgresEnabled && /^\/api\/auth\/(request|verify)$/.test(req.path))
+      return next();
     service.app(req, res, next);
   });
   await app.init();
+  if (authPostgresEnabled) {
+    const postgres = app.get(PostgresService);
+    if (!postgres.ready)
+      throw new Error("PostgreSQL doit être prêt pour activer l’authentification Nest.");
+    config.findPostgresSession = (tokenHash) =>
+      lookupPostgresSession(postgres, tokenHash);
+  }
   const httpServer = app.getHttpServer();
   const realtime = attachRealtime(
     httpServer,
@@ -113,6 +132,8 @@ async function bootstrap() {
     service.safetyDriverEligible,
   );
   service.setOnChange(realtime.publish);
+  service.setDispatchNotifier(realtime.notifyDrivers);
+  service.dispatch.start();
 
   const cleanup = setInterval(() => {
     service.safetyCleanup();
@@ -147,6 +168,7 @@ async function bootstrap() {
     closing = true;
     clearInterval(cleanup);
     clearInterval(scheduler);
+    service.dispatch.stop();
     realtime.close();
     await app.close();
     store.db.close();

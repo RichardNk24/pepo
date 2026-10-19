@@ -3,38 +3,45 @@ import type { Trip } from "@pepo/types/model";
 import { haversine } from "@pepo/utils/rules";
 import type { Store } from "../database";
 
-const H3_RESOLUTION = 9;
-const LOCATION_MAX_AGE_MS = 45_000;
+export const H3_DISPATCH_RESOLUTION = 9;
+export const DRIVER_LOCATION_MAX_AGE_MS = 45_000;
 const MAX_SHORTLIST = 24;
 
-type LocatedDriver = {
+export type LocatedDriver = {
   id: string;
+  city: string;
+  vehicle: string;
+  cell: string;
   latitude: number;
   longitude: number;
   capturedAt: number;
 };
 
-/**
- * Return a bounded, city/vehicle/availability-filtered dispatch shortlist.
- * H3 is only the first spatial index: road ETA must be calculated for the
- * shortlist before an automatic assignment is ever made.
- */
-export function availableDriverIds(store: Store, trip: Trip, now = Date.now()) {
+/** H3 prefilter for the bounded ETA stage; does not claim a road-time rank. */
+export function availableDriverPositions(
+  store: Store,
+  trip: Trip,
+  now = Date.now(),
+  limit = MAX_SHORTLIST,
+  excludedDriverIds: string[] = [],
+): LocatedDriver[] {
+  if (limit <= 0 || limit > 24)
+    throw new RangeError("Dispatch shortlist limit must be 1–24.");
   const pickupCell = latLngToCell(
     trip.pickup.latitude,
     trip.pickup.longitude,
-    H3_RESOLUTION,
+    H3_DISPATCH_RESOLUTION,
   );
   let located: LocatedDriver[] = [];
 
-  // Grow the H3 neighborhood until there is a useful candidate set or the
-  // search reaches roughly a few kilometres. gridDisk is pentagon-safe.
-  for (let radius = 0; radius <= 8; radius += 2) {
+  // Expand through contiguous H3 disks, stopping as soon as the shortlist is
+  // useful. The final radius covers a few urban kilometres at resolution 9.
+  for (let radius = 0; radius <= 12; radius += 2) {
     const cells = gridDisk(pickupCell, radius);
     const placeholders = cells.map(() => "?").join(",");
     located = store.db
       .prepare(
-        `SELECT p.userId AS id,p.latitude,p.longitude,p.capturedAt
+        `SELECT p.userId AS id,p.city,p.vehicle,p.cell,p.latitude,p.longitude,p.capturedAt
          FROM driver_positions p
          JOIN users u ON u.id=p.userId
          JOIN driver_profiles d ON d.userId=p.userId
@@ -45,6 +52,7 @@ export function availableDriverIds(store: Store, trip: Trip, now = Date.now()) {
            AND json_extract(d.data,'$.verification')='verified'
            AND json_extract(d.data,'$.vehicle.vehicle')=?
            AND p.userId<>?
+           ${excludedDriverIds.length ? `AND p.userId NOT IN (${excludedDriverIds.map(() => "?").join(",")})` : ""}
            AND NOT EXISTS (
              SELECT 1 FROM trips t WHERE t.driverId=p.userId
                AND t.status IN ('accepted','arrived','in_progress')
@@ -55,26 +63,28 @@ export function availableDriverIds(store: Store, trip: Trip, now = Date.now()) {
         trip.pickup.city,
         trip.vehicle,
         ...cells,
-        now - LOCATION_MAX_AGE_MS,
+        now - DRIVER_LOCATION_MAX_AGE_MS,
         now + 2_000,
         trip.pickup.city,
         trip.vehicle,
         trip.riderId,
+        ...excludedDriverIds,
       ) as LocatedDriver[];
-    if (located.length >= MAX_SHORTLIST || radius === 8) break;
+    if (located.length >= limit || radius === 12) break;
   }
+  return located
+    .sort(
+      (a, b) =>
+        haversine(a, trip.pickup) - haversine(b, trip.pickup) ||
+        b.capturedAt - a.capturedAt,
+    )
+    .slice(0, limit);
+}
 
-  const ranked = located
-    .sort((a, b) => {
-      const etaProxyA = haversine(a, trip.pickup);
-      const etaProxyB = haversine(b, trip.pickup);
-      return etaProxyA - etaProxyB || b.capturedAt - a.capturedAt;
-    })
-    .slice(0, MAX_SHORTLIST)
-    .map((driver) => driver.id);
-
-  // Keep older app versions and development fixtures usable while location
-  // reporting rolls out. These rows have no GPS-based rank and only fill gaps.
+/** Compatibility feed for older clients; GPS candidates are H3-prefiltered. */
+export function availableDriverIds(store: Store, trip: Trip, now = Date.now()) {
+  const located = availableDriverPositions(store, trip, now);
+  const ranked = located.map((driver) => driver.id);
   if (ranked.length < MAX_SHORTLIST) {
     const excluded = ranked.length
       ? `AND u.id NOT IN (${ranked.map(() => "?").join(",")})`
@@ -102,6 +112,5 @@ export function availableDriverIds(store: Store, trip: Trip, now = Date.now()) {
       ) as { id: string }[];
     ranked.push(...legacy.map((driver) => driver.id));
   }
-
   return [...new Set(ranked)];
 }

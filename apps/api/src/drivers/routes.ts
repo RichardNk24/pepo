@@ -5,7 +5,7 @@ import { haversine } from "@pepo/utils/rules";
 
 import { wrap, type RouteContext } from "../runtime";
 export function register_drivers(ctx: RouteContext) {
-  const { app, store, visibleTrip, requireDriver, safety } = ctx;
+  const { app, store, visibleTrip, requireDriver, safety, dispatch } = ctx;
   app.post(
     "/api/me/online",
     wrap((req, res) => {
@@ -13,10 +13,16 @@ export function register_drivers(ctx: RouteContext) {
       if (online) requireDriver(req.actor);
       req.actor.online = online;
       store.saveUser(req.actor);
-      if (!online)
+      if (!online) {
         store.db
           .prepare("DELETE FROM driver_positions WHERE userId=?")
           .run(req.actor.id);
+        store.db
+          .prepare(
+            "UPDATE dispatch_recommendations SET status='cancelled' WHERE driverId=? AND status='pending'",
+          )
+          .run(req.actor.id);
+      }
       res.json(req.actor);
     }),
   );
@@ -77,18 +83,72 @@ export function register_drivers(ctx: RouteContext) {
       requireDriver(req.actor);
       if (!req.actor.online || store.activeFor(req.actor.id).length)
         return res.json([]);
-      res.json(
-        store
-          .trips(
-            "SELECT data FROM trips WHERE city=? AND vehicle=? AND status='searching' ORDER BY createdAt DESC LIMIT 30",
-            req.actor.city,
-            req.actor.driver!.vehicle,
-          )
-          .filter(
-            (t) => t.riderId !== req.actor.id && safety.eligible(t, req.actor),
-          )
-          .map((t) => visibleTrip(t, req.actor)),
+      const cityTrips = store
+        .trips(
+          "SELECT data FROM trips WHERE city=? AND vehicle=? AND status='searching' ORDER BY createdAt DESC LIMIT 60",
+          req.actor.city,
+          req.actor.driver!.vehicle,
+        )
+        .filter(
+          (t) => t.riderId !== req.actor.id && safety.eligible(t, req.actor),
+        );
+      if (!dispatch.locationIsFresh(req.actor.id))
+        return res.json(
+          cityTrips.slice(0, 30).map((t) => visibleTrip(t, req.actor)),
+        );
+
+      const assigned = dispatch.pendingTripsFor(req.actor.id);
+      const recommendationByTrip = new Map(
+        assigned.map((item) => [item.tripId, item]),
       );
+      // Matching considers the oldest requests first; include explicitly
+      // assigned trips even when more than 60 requests have accumulated.
+      const requestPool = new Map(cityTrips.map((trip) => [trip.id, trip]));
+      for (const item of assigned) {
+        const trip = store.trip(item.tripId);
+        if (
+          trip &&
+          trip.status === "searching" &&
+          trip.riderId !== req.actor.id &&
+          trip.pickup.city === req.actor.city &&
+          trip.vehicle === req.actor.driver!.vehicle &&
+          safety.eligible(trip, req.actor)
+        )
+          requestPool.set(trip.id, trip);
+      }
+      const requests = [...requestPool.values()]
+        .filter(
+          (trip) =>
+            recommendationByTrip.has(trip.id) ||
+            trip.offers.some((offer) => offer.driver.id === req.actor.id),
+        )
+        .sort((a, b) => {
+          const etaA = recommendationByTrip.get(a.id)?.etaSeconds;
+          const etaB = recommendationByTrip.get(b.id)?.etaSeconds;
+          if (etaA !== undefined || etaB !== undefined)
+            return (
+              (etaA ?? Number.POSITIVE_INFINITY) -
+              (etaB ?? Number.POSITIVE_INFINITY)
+            );
+          return a.createdAt - b.createdAt;
+        })
+        .map((trip) => {
+          const result = visibleTrip(trip, req.actor);
+          const recommendation = recommendationByTrip.get(trip.id);
+          return recommendation
+            ? {
+                ...result,
+                dispatchRecommendation: {
+                  etaMinutes: Math.max(
+                    1,
+                    Math.ceil(recommendation.etaSeconds / 60),
+                  ),
+                  expiresAt: recommendation.expiresAt,
+                },
+              }
+            : result;
+        });
+      res.json(requests);
     }),
   );
 }

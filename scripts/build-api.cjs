@@ -18,6 +18,7 @@ build({
 })
   .then(() => {
     fs.cpSync("apps/api/src/admin", "apps/api/dist/admin", { recursive: true });
+    fs.cpSync("apps/api/src/nest/infrastructure/migrations", "apps/api/dist/nest/infrastructure/migrations", { recursive: true });
     fs.mkdirSync("apps/api/dist/map-assets", { recursive: true });
     fs.cpSync("packages/maps/assets/vehicles", "apps/api/dist/map-assets", {
       recursive: true,

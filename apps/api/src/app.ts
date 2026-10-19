@@ -149,5 +149,7 @@ export function createApp(store: Store, config: ServerConfig) {
     visibleTrip,
     auth,
     setOnChange: ctx.setOnChange,
+    dispatch: ctx.dispatch,
+    setDispatchNotifier: ctx.setDispatchNotifier,
   };
 }

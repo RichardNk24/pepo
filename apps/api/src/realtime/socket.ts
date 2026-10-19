@@ -61,6 +61,9 @@ export function attachRealtime(
       // Only an invalidation event is sent; REST verifies the role, participant and session again.
       for (const id of ids) io.to(`user:${id}`).emit("refresh");
     },
+    notifyDrivers(driverIds: string[]) {
+      for (const id of new Set(driverIds)) io.to(`user:${id}`).emit("refresh");
+    },
     close() {
       clearInterval(timer);
       io.close();
