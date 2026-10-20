@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   HttpException,
+  Inject,
   Post,
 } from "@nestjs/common";
 import { z } from "zod";
@@ -19,7 +20,7 @@ const verifyInput = z.object({
 
 @Controller("api/auth")
 export class PostgresAuthController {
-  constructor(private readonly auth: PostgresAuthService) {}
+  constructor(@Inject(PostgresAuthService) private readonly auth: PostgresAuthService) {}
 
   @Post("request")
   async request(@Body() body: unknown) {

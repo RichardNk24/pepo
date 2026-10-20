@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { GOOGLE_MAP_URL } from "@pepo/api-client/maps";
 import { C } from "@pepo/config/tokens";
 import { Button,Txt } from "@pepo/ui/UI";
@@ -9,11 +10,12 @@ import type { MapProps } from "./MapTypes";
 import { useMapMotion } from "./useMapMotion";
 
 export default function GoogleMap(props: MapProps) {
+  const palette = useThemeColors();
   const motionEnabled = useMapMotion();
   const source = useMemo(() => ({ uri: GOOGLE_MAP_URL }), []);
   const ref = useRef<WebView>(null),
     latest = useRef(props);
-  latest.current = { ...props, motionEnabled };
+  latest.current = { ...props, motionEnabled, mapTheme: palette.themeName as MapProps["mapTheme"] };
   const [ready, setReady] = useState(false),
     [error, setError] = useState(""),
     [revision, setRevision] = useState(0);
@@ -25,7 +27,7 @@ export default function GoogleMap(props: MapProps) {
   };
   useEffect(() => {
     if (ready) update();
-  }, [props, ready, motionEnabled]);
+  }, [props, ready, motionEnabled, palette]);
   return (
     <View
       style={[

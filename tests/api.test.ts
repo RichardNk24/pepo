@@ -370,7 +370,7 @@ describe("Pepo API with real persistence and authorization", () => {
       .post(`/api/trips/${trip.id}/status`)
       .set(auth(rider.token))
       .send({ status: "arrived" })
-      .expect(400);
+      .expect(403);
     await request(app)
       .post(`/api/trips/${trip.id}/status`)
       .set(auth(d.token))

@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { useVoicePreferences } from "@pepo/voice/preferences";
 import { profileFor } from "@pepo/voice/profiles";
 import { LIVE } from "@pepo/api-client/api";
@@ -76,6 +77,9 @@ export function PlaceSearch({
   onPickupSelect?: (p: Place) => void;
   onDestinationSelect?: (p: Place) => void;
 }) {
+ const C=useThemeColors();
+ const styles=makeStyles(C);
+
   const { preferences: voicePreferences } = useVoicePreferences();
   const app = useApp(),
     location = useLocation();
@@ -797,7 +801,7 @@ export function PlaceSearch({
                               variant="micro"
                               color={
                                 personalPlaces.personalizationEnabled
-                                  ? C.ink
+                                  ? C.onAccent
                                   : C.muted
                               }
                             >
@@ -923,7 +927,7 @@ export function PlaceSearch({
     </>
   );
 }
-const styles = StyleSheet.create({
+const makeStyles = (C: ReturnType<typeof useThemeColors>) => StyleSheet.create({
   placeItem: {
     flexDirection: "row",
     alignItems: "center",

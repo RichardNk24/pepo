@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { coordinatePlace } from "@pepo/api-client/maps";
 import { C } from "@pepo/config/tokens";
 import { demoFleet } from "@pepo/maps/demoFleet";
@@ -25,6 +26,8 @@ import { RouteSummary } from "../../src/components/RouteSummary";
 import { SnapSheet } from "../../src/components/SnapSheet";
 
 export default function Home() {
+  const C = useThemeColors();
+  const h = makeStyles(C);
   const app = useApp(),
     router = useRouter(),
     ui = useUI();
@@ -42,8 +45,7 @@ export default function Home() {
   // Development-only map preview for testing the selected vehicle artwork
   // while using a local API session.
   const showMapDemoFleet =
-    app.demo ||
-    (__DEV__ && process.env.EXPO_PUBLIC_MAP_DEMO_FLEET === "true");
+    app.demo || (__DEV__ && process.env.EXPO_PUBLIC_MAP_DEMO_FLEET === "true");
   useEffect(() => {
     manualPickup.current = false;
     located.current = false;
@@ -67,8 +69,7 @@ export default function Home() {
   }, [location.fix?.timestamp, app.settings.city]);
   const active = app.activeTrip;
   const nearbyVehicles = useMemo(
-    () =>
-      showMapDemoFleet && !active ? demoFleet(pickup, vehicle) : [],
+    () => (showMapDemoFleet && !active ? demoFleet(pickup, vehicle) : []),
     [showMapDemoFleet, !!active, pickup.latitude, pickup.longitude, vehicle],
   );
   const book = (destination: Place) =>
@@ -203,7 +204,7 @@ export default function Home() {
                 }}
                 style={h.timePill}
               >
-                <CalendarClock size={17} color={C.green} />
+                <CalendarClock size={17} color={C.accentDark} />
               </Pressable>
             </View>
             <Pressable
@@ -215,12 +216,12 @@ export default function Home() {
               }}
               style={h.search}
             >
-              <MapPin size={21} color={C.yellow} />
+              <MapPin size={21} color={C.accentOnInk} />
               <Txt variant="h3" color="#fff" style={{ flex: 1 }}>
                 {app.t("destination")}
               </Txt>
               <View style={h.arrow}>
-                <ArrowRight size={18} color={C.ink} />
+                <ArrowRight size={18} color={C.onAccent} />
               </View>
             </Pressable>
             <Pressable
@@ -232,7 +233,7 @@ export default function Home() {
                   width: 6,
                   height: 6,
                   borderRadius: 6,
-                  backgroundColor: C.green,
+                  backgroundColor: C.accentDark,
                 }}
               />
               <Txt variant="small" color={C.muted}>
@@ -266,81 +267,82 @@ export default function Home() {
     </View>
   );
 }
-const h = StyleSheet.create({
-  header: {
-    padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  city: {
-    backgroundColor: "#fff",
-    padding: 9,
-    paddingRight: 15,
-    borderRadius: 22,
-  },
-  logo: {
-    width: 35,
-    height: 35,
-    borderRadius: 13,
-    backgroundColor: C.yellow,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  panel: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: C.paper,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    paddingBottom: 23,
-    shadowColor: "#223316",
-    shadowOpacity: 0.06,
-    shadowRadius: 20,
-    elevation: 6,
-  },
-  handle: {
-    width: 35,
-    height: 4,
-    borderRadius: 4,
-    backgroundColor: "#D9DDD2",
-    alignSelf: "center",
-    marginBottom: 19,
-  },
-  search: {
-    backgroundColor: C.ink,
-    borderRadius: 17,
-    padding: 15,
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "center",
-  },
-  arrow: {
-    width: 29,
-    height: 29,
-    borderRadius: 10,
-    backgroundColor: C.yellow,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timePill: {
-    padding: 9,
-    backgroundColor: C.greenSoft,
-    borderRadius: 20,
-    flexDirection: "row",
-    gap: 5,
-    alignItems: "center",
-  },
-  vehicle: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 17,
-    borderWidth: 1,
-    alignItems: "center",
-    gap: 3,
-  },
-});
+const makeStyles = (C: ReturnType<typeof useThemeColors>) =>
+  StyleSheet.create({
+    header: {
+      padding: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    city: {
+      backgroundColor: "#fff",
+      padding: 9,
+      paddingRight: 15,
+      borderRadius: 22,
+    },
+    logo: {
+      width: 35,
+      height: 35,
+      borderRadius: 13,
+      backgroundColor: C.yellow,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    panel: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: C.paper,
+      borderTopLeftRadius: 30,
+      borderTopRightRadius: 30,
+      paddingHorizontal: 24,
+      paddingTop: 10,
+      paddingBottom: 23,
+      shadowColor: "#223316",
+      shadowOpacity: 0.06,
+      shadowRadius: 20,
+      elevation: 6,
+    },
+    handle: {
+      width: 35,
+      height: 4,
+      borderRadius: 4,
+      backgroundColor: "#D9DDD2",
+      alignSelf: "center",
+      marginBottom: 19,
+    },
+    search: {
+      backgroundColor: C.ink,
+      borderRadius: 17,
+      padding: 15,
+      flexDirection: "row",
+      gap: 12,
+      alignItems: "center",
+    },
+    arrow: {
+      width: 29,
+      height: 29,
+      borderRadius: 10,
+      backgroundColor: C.yellow,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    timePill: {
+      padding: 9,
+      backgroundColor: C.accentSoft,
+      borderRadius: 20,
+      flexDirection: "row",
+      gap: 5,
+      alignItems: "center",
+    },
+    vehicle: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 17,
+      borderWidth: 1,
+      alignItems: "center",
+      gap: 3,
+    },
+  });

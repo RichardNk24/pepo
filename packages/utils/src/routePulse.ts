@@ -1,8 +1,8 @@
 import type { Point } from "@pepo/types/model";
 // Self-contained: serialized into the Google Maps document and used natively.
 // All distances are measured along the road polyline, never along a straight chord.
-export function createRoutePulse(points: Point[]) {
-  const colors = [
+export function createRoutePulse(points: Point[], theme: string = "classic") {
+  const colors = theme === "purple" ? ["#000000","#19002F","#330060","#500095","#6900C7","#8000FF"] : theme === "mono" ? ["#000000","#222222","#555555","#888888","#BBBBBB","#FFFFFF"] : [
     "#000000",
     "#181601",
     "#443D03",

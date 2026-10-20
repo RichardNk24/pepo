@@ -190,6 +190,10 @@ export type Trip = {
   createdAt: number;
   updatedAt: number;
   completedAt?: number;
+  arrivedAt?: number;
+  cancelledAt?: number;
+  /** Driver declaration of cash received, not an electronic settlement. */
+  cashCollectedAt?: number;
   startedAt?: number;
   rating?: number;
   driverLocation?: Point;

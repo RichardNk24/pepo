@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { C } from "@pepo/config/tokens";
 import { useApp } from "@pepo/session/AppProvider";
 import { useLocation } from "@pepo/session/LocationProvider";
@@ -48,6 +49,7 @@ import { AccountPhoto } from "../../src/components/AccountPhoto";
 import { ContactEditor } from "../../src/components/ContactEditor";
 type Panel = "profile" | "photo" | "payments" | "settings" | null;
 export default function Account() {
+  const C = useThemeColors();
   const voice = useVoice();
   const app = useApp(),
     router = useRouter(),
@@ -129,6 +131,11 @@ export default function Account() {
           gap: 22,
         }}
       >
+        <Button
+          title="Pepo Premium · Votre style, vos trajets"
+          kind="yellow"
+          onPress={() => router.push("/premium")}
+        />
         <Button
           title="Voix et navigation"
           kind="secondary"

@@ -9,6 +9,14 @@ const points = [
   { latitude: 1, longitude: 1 },
 ];
 describe("Route light sweep", () => {
+  it("changes only sweep colours for premium themes, preserving road geometry", () => {
+    const classic=createRoutePulse(points).frame(1400);
+    for (const [theme,end] of [["purple","#8000ff"],["mono","#ffffff"]]) {
+      const themed=createRoutePulse(points,theme).frame(1400);
+      expect(themed.at(-1)?.color).toBe(end);
+      expect(themed.map(p=>p.points)).toEqual(classic.map(p=>p.points));
+    }
+  });
   it("repeats every three seconds and follows road corners", () => {
     const pulse = createRoutePulse(points);
     expect(pulse.frame(1400)).toEqual(pulse.frame(4400));

@@ -1,6 +1,7 @@
 import type { Place,Point,Route } from "@pepo/types/model";
 import type { LocationFix } from "@pepo/utils/mapGeometry";
 export type MapProps = {
+  mapTheme?: "classic" | "purple" | "mono";
   labels?: { pickup: string; destination: string };
   motionEnabled?: boolean;
   nearbyVehicles?: import("./demoFleet").DemoVehicle[];

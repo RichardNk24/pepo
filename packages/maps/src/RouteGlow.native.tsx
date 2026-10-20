@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import type { Point } from "@pepo/types/model";
 import { createRoutePulse } from "@pepo/utils/routePulse";
 import { useEffect,useMemo,useState } from "react";
@@ -10,8 +11,9 @@ export function RouteGlow({
   points: Point[];
   visible: boolean;
 }) {
+  const C=useThemeColors();
   const enabled = useMapMotion();
-  const pulse = useMemo(() => createRoutePulse(points), [points]);
+  const pulse = useMemo(() => createRoutePulse(points,C.themeName), [points,C.themeName]);
   const [layers, setLayers] = useState<ReturnType<typeof pulse.frame>>([]);
   useEffect(() => {
     setLayers([]);
@@ -37,7 +39,7 @@ export function RouteGlow({
       {halo.length >= 2 && (
         <Polyline
           coordinates={halo}
-          strokeColor="#C8B10926"
+          strokeColor={C.themeName === "purple" ? "#8000FF26" : C.themeName === "mono" ? "#FFFFFF26" : "#C8B10926"}
           strokeWidth={12}
           zIndex={3}
           lineCap="round"

@@ -1,35 +1,36 @@
-import { API_URL,getToken } from "@pepo/api-client/api";
-import { C,shadow } from "@pepo/config/tokens";
+import { useThemeColors } from "@pepo/ui/Theme";
+import { API_URL, getToken } from "@pepo/api-client/api";
+import { C, shadow } from "@pepo/config/tokens";
 import { useI18n } from "@pepo/i18n/Context";
 import { useRouter } from "expo-router";
 import {
-ArrowLeft,
-Check,
-ShieldCheck,
-X,
-type LucideIcon,
+  ArrowLeft,
+  Check,
+  ShieldCheck,
+  X,
+  type LucideIcon,
 } from "lucide-react-native";
-import React,{
-createContext,
-useContext,
-useEffect,
-useState,
-type ReactNode,
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
 } from "react";
 import {
-ActivityIndicator,
-Image,
-Modal,
-Platform,
-Pressable,
-StyleSheet,
-Text,
-TextInput,
-View,
-type StyleProp,
-type TextInputProps,
-type TextProps,
-type ViewStyle,
+  ActivityIndicator,
+  Image,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type StyleProp,
+  type TextInputProps,
+  type TextProps,
+  type ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -49,6 +50,7 @@ const UIContext = createContext<{
 }>({ alert: () => {}, confirm: async () => false });
 export const useUI = () => useContext(UIContext);
 export function UIProvider({ children }: { children: ReactNode }) {
+  const C = useThemeColors();
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const close = (value: boolean) => {
     dialog?.confirm?.(value);
@@ -159,6 +161,7 @@ export function Txt({
   color?: string;
   translate?: boolean;
 }) {
+  const C = useThemeColors();
   const { text } = useI18n();
   const children = localized
     ? React.Children.map(props.children, (child) =>
@@ -190,12 +193,18 @@ export function Button({
   compact?: boolean;
   accessibilityLabel?: string;
 }) {
+  const C = useThemeColors();
   const { text } = useI18n();
   title = text(title);
   accessibilityLabel = accessibilityLabel ? text(accessibilityLabel) : title;
   const [loading, setLoading] = useState(false);
   const ui = useUI();
-  const color = kind === "primary" || kind === "danger" ? C.paper : C.ink;
+  const color =
+    kind === "primary" || kind === "danger"
+      ? C.paper
+      : kind === "yellow"
+        ? C.onAccent
+        : C.ink;
   const backgroundColor = {
     primary: C.ink,
     yellow: C.yellow,
@@ -254,6 +263,7 @@ export function IconButton({
   style?: StyleProp<ViewStyle>;
   color?: string;
 }) {
+  const C = useThemeColors();
   const { text } = useI18n();
   return (
     <Pressable
@@ -277,6 +287,7 @@ export function Screen({
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
+  const C = useThemeColors();
   return (
     <SafeAreaView edges={["top"]} style={[s.screen, style]}>
       {children}
@@ -294,6 +305,7 @@ export function Header({
   back?: boolean;
   right?: ReactNode;
 }) {
+  const C = useThemeColors();
   const router = useRouter();
   const { text } = useI18n();
   title = text(title);
@@ -330,6 +342,7 @@ export function Tag({
   tone?: "neutral" | "green" | "yellow";
   icon?: LucideIcon;
 }) {
+  const C = useThemeColors();
   const color = tone === "green" ? C.green : C.ink;
   return (
     <View
@@ -367,6 +380,7 @@ export function Avatar({
   verified?: boolean;
   imagePath?: string;
 }) {
+  const C = useThemeColors();
   const [uri, setUri] = useState<string>();
   useEffect(() => {
     let disposed = false;
@@ -438,6 +452,7 @@ export function Avatar({
   );
 }
 export function Field(props: TextInputProps & { label?: string }) {
+  const C = useThemeColors();
   const { text } = useI18n();
   return (
     <View style={{ gap: 7 }}>
@@ -459,11 +474,13 @@ export function Field(props: TextInputProps & { label?: string }) {
   );
 }
 export function Divider() {
+  const C = useThemeColors();
   return (
     <View style={{ height: 1, backgroundColor: C.line, marginVertical: 16 }} />
   );
 }
 export function CheckRow({ text }: { text: string }) {
+  const C = useThemeColors();
   return (
     <View style={s.row}>
       <View

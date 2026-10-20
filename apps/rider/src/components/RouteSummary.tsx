@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { C } from "@pepo/config/tokens";
 import type { Place } from "@pepo/types/model";
 import { Txt } from "@pepo/ui/UI";
@@ -11,6 +12,9 @@ export function RouteSummary({
   destination: Place;
   stops?: Place[];
 }) {
+ const C=useThemeColors();
+ const r=makeStyles(C);
+
   return (
     <View style={{ gap: 14, paddingVertical: 4 }}>
       <View style={r.line} />
@@ -38,7 +42,7 @@ export function RouteSummary({
     </View>
   );
 }
-const r = StyleSheet.create({
+const makeStyles = (C: ReturnType<typeof useThemeColors>) => StyleSheet.create({
   row: { flexDirection: "row", gap: 15, alignItems: "center" },
   dot: { width: 10, height: 10, marginLeft: 4 },
   line: {

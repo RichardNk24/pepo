@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { GOOGLE_MAP_URL } from "@pepo/api-client/maps";
 import { C } from "@pepo/config/tokens";
 import { useI18n } from "@pepo/i18n/Context";
@@ -77,6 +78,7 @@ function GoogleConfigurationNotice(props: MapProps) {
   );
 }
 function NativeMap(props: MapProps) {
+ const C=useThemeColors();
   const {
     pickup,
     destination,
@@ -250,7 +252,7 @@ function NativeMap(props: MapProps) {
             key={p.id + i}
             coordinate={p}
             title={`Étape ${i + 1} : ${p.name}`}
-            pinColor="#9C8B07"
+            pinColor={C.yellow}
           />
         ))}
       {!picking && destination && (
@@ -274,7 +276,7 @@ function NativeMap(props: MapProps) {
               >
                 <Txt
                   variant="label"
-                  color={C.yellow}
+                  color={C.accentOnInk}
                   style={{ fontSize: 12, lineHeight: 16 }}
                 >
                   {props.labels?.destination || "Arrivée"}

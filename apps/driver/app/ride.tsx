@@ -1,3 +1,4 @@
+import { TripReceipt } from "@pepo/ui/TripReceipt";
 import { TripNavigation } from "@pepo/voice/TripNavigation";
 import { C } from "@pepo/config/tokens";
 import MapBoard from "@pepo/maps/MapBoard";
@@ -164,6 +165,7 @@ export default function DriverRide() {
             onShare={() => app.shareTrip(trip.id)}
           />
         )}
+        <TripReceipt trip={trip} language={app.settings.language} demo={app.demo} driver />
         {app.demo ? <Tag tone="yellow">{app.t("demoOnly")}</Tag> : null}
         {isPickup || trip.status === "in_progress" ? (
           <>
