@@ -17,6 +17,7 @@ import { z } from "zod";
 import type { Store } from "./database";
 import { createSafety } from "./safety/service";
 import { sendTripActivityUpdate } from "./live-activities/apns";
+import { createDispatchService } from "./dispatch/service";
 
 export type ServerConfig = {
   devAuth: boolean;
@@ -28,6 +29,12 @@ export type ServerConfig = {
   dataDir: string;
   corsOrigins: string[];
   sendSms?: (phone: string, text: string) => Promise<void>;
+  /** Enables the opt-in Nest/PostgreSQL authentication cutover. */
+  authPostgresEnabled?: boolean;
+  /** PostgreSQL-first lookup with SQLite fallback for compatibility sessions. */
+  findPostgresSession?: (
+    tokenHash: string,
+  ) => Promise<{ userId: string; role: "passenger" | "driver" } | undefined>;
   safety?: { enabled?: boolean; supportPhone?: string; now?: () => number };
 };
 export class ApiError extends Error {
@@ -161,6 +168,13 @@ export function createRuntime(store: Store, config: ServerConfig) {
     }),
   );
   const safety = createSafety(store, config);
+  let dispatchNotifyDrivers: (ids: string[]) => void = () => {};
+  const dispatch = createDispatchService(
+    store,
+    config.googleKey,
+    safety.eligible,
+    (ids) => dispatchNotifyDrivers(ids),
+  );
   let onChange: (trip: Trip) => void = () => {};
   const notify = (t: Trip) => {
     onChange(t);
@@ -201,22 +215,28 @@ export function createRuntime(store: Store, config: ServerConfig) {
       result.riderPhone = t.guest?.phone || store.user(t.riderId)?.phone;
     return result;
   };
-  const auth = (req: Request, _res: Response, next: NextFunction) => {
+  const auth = async (req: Request, _res: Response, next: NextFunction) => {
     const tokenHash = hash(
       req.headers.authorization?.replace(/^Bearer /, "") || "",
     );
-    const session = store.db
-      .prepare("SELECT userId,role FROM sessions WHERE hash=? AND expiresAt>?")
-      .get(tokenHash, Date.now()) as
-      | { userId: string; role: "passenger" | "driver" }
-      | undefined;
-    const actor = session && store.user(session.userId, session.role);
-    if (!actor)
-      return next(
-        new ApiError(401, "Votre session a expiré. Reconnectez-vous."),
-      );
-    Object.assign(req, { actor, tokenHash });
-    next();
+    try {
+      const session =
+        (await config.findPostgresSession?.(tokenHash)) ||
+        (store.db
+          .prepare("SELECT userId,role FROM sessions WHERE hash=? AND expiresAt>?")
+          .get(tokenHash, Date.now()) as
+          | { userId: string; role: "passenger" | "driver" }
+          | undefined);
+      const actor = session && store.user(session.userId, session.role);
+      if (!actor)
+        return next(
+          new ApiError(401, "Votre session a expiré. Reconnectez-vous."),
+        );
+      Object.assign(req, { actor, tokenHash });
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
   const requiredTrip = (tripId: string) => {
     const t = store.trip(tripId);
@@ -269,6 +289,7 @@ export function createRuntime(store: Store, config: ServerConfig) {
   };
   return {
     safety,
+    dispatch,
     validateMapArea,
     app,
     store,
@@ -286,6 +307,9 @@ export function createRuntime(store: Store, config: ServerConfig) {
     upload,
     setOnChange: (fn: typeof onChange) => {
       onChange = fn;
+    },
+    setDispatchNotifier: (fn: typeof dispatchNotifyDrivers) => {
+      dispatchNotifyDrivers = fn;
     },
   };
 }

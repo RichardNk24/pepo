@@ -233,6 +233,11 @@ export function register_trips(ctx: RouteContext) {
         t.offers.push(offer);
         t.updatedAt = Date.now();
         store.saveTrip(t);
+        store.db
+          .prepare(
+            "UPDATE dispatch_recommendations SET status='offered' WHERE tripId=? AND driverId=? AND status='pending'",
+          )
+          .run(t.id, req.actor.id);
         return t;
       });
       notify(t);

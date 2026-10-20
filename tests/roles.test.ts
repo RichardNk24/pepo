@@ -9,7 +9,10 @@ import { createApp } from "../apps/api/src/app";
 import { availableDriverIds } from "../apps/api/src/dispatch/availableDrivers";
 import { PLACES } from "@pepo/utils/cities";
 import type { Profile, Trip, Role } from "@pepo/types/model";
-let store: Store, dir: string, app: ReturnType<typeof createApp>["app"];
+let store: Store,
+  dir: string,
+  app: ReturnType<typeof createApp>["app"],
+  dispatch: ReturnType<typeof createApp>["dispatch"];
 const auth = (token: string) => ({ Authorization: "Bearer " + token });
 const phone = "+243842123456";
 async function login(role: Role, p = phone) {
@@ -34,13 +37,15 @@ describe("One identity with independent Rider and Driver sessions", () => {
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), "pepo-roles-"));
     store = openDatabase(":memory:");
-    app = createApp(store, {
+    const service = createApp(store, {
       safety: { enabled: false },
       devAuth: true,
       dataDir: dir,
       publicUrl: "https://pepo.test",
       corsOrigins: [],
-    }).app;
+    });
+    app = service.app;
+    dispatch = service.dispatch;
   });
   afterEach(() => {
     store.db.close();
@@ -199,6 +204,70 @@ describe("One identity with independent Rider and Driver sessions", () => {
     expect(payments.mobileMoney.enabled).toBe(false);
     expect(payments.card.enabled).toBe(false);
   });
+  it("uses only fresh H3-indexed driver positions for spatial dispatch and removes them when offline", async () => {
+    const d = await login("driver", "+243842123457");
+    store.saveUser({
+      ...d.profile,
+      online: true,
+      verification: "verified",
+      driver: {
+        vehicle: "moto",
+        model: "Haojue",
+        plate: "LSH GPS 01",
+        helmet: true,
+      },
+    });
+    const driverToken = d.token;
+    const fixTime = Date.now();
+    await request(app)
+      .post("/api/me/location")
+      .set(auth(driverToken))
+      .send({
+        latitude: PLACES[0].latitude,
+        longitude: PLACES[0].longitude,
+        accuracy: 12,
+        capturedAt: fixTime,
+      })
+      .expect(202, { accepted: true });
+
+    const rider = await login("passenger", "+243842123458");
+    const trip = (
+      await request(app)
+        .post("/api/trips")
+        .set(auth(rider.token))
+        .send({
+          pickup: PLACES[0],
+          destination: PLACES[2],
+          vehicle: "moto",
+          proposedPrice: 5000,
+        })
+        .expect(201)
+    ).body as Trip;
+    expect(availableDriverIds(store, trip, fixTime + 1000)).toContain(
+      d.profile.id,
+    );
+
+    store.db
+      .prepare("UPDATE driver_positions SET capturedAt=? WHERE userId=?")
+      .run(fixTime - 60_000, d.profile.id);
+    expect(availableDriverIds(store, trip, fixTime + 1000)).not.toContain(
+      d.profile.id,
+    );
+
+    store.db
+      .prepare("UPDATE driver_positions SET capturedAt=? WHERE userId=?")
+      .run(fixTime, d.profile.id);
+    await request(app)
+      .post("/api/me/online")
+      .set(auth(driverToken))
+      .send({ online: false })
+      .expect(200);
+    expect(
+      store.db
+        .prepare("SELECT userId FROM driver_positions WHERE userId=?")
+        .get(d.profile.id),
+    ).toBeUndefined();
+  });
   it("migrates a legacy database twice without resetting documents, sessions or driver availability", () => {
     const path = join(dir, "legacy.sqlite");
     const legacy = new DatabaseSync(path);
@@ -241,5 +310,69 @@ describe("One identity with independent Rider and Driver sessions", () => {
       );
       db.db.close();
     }
+  });
+  it("matches a fresh nearby driver to a request and returns the ETA recommendation", async () => {
+    const d = await login("driver", "+243842123459");
+    store.saveUser({
+      ...d.profile,
+      online: true,
+      verification: "verified",
+      driver: {
+        vehicle: "moto",
+        model: "Haojue",
+        plate: "LSH MATCH 01",
+        helmet: true,
+      },
+    });
+    const fixTime = Date.now();
+    await request(app)
+      .post("/api/me/location")
+      .set(auth(d.token))
+      .send({
+        latitude: PLACES[0].latitude,
+        longitude: PLACES[0].longitude,
+        accuracy: 10,
+        capturedAt: fixTime,
+      })
+      .expect(202, { accepted: true });
+
+    const rider = await login("passenger", "+243842123460");
+    const created = (
+      await request(app)
+        .post("/api/trips")
+        .set(auth(rider.token))
+        .send({
+          pickup: PLACES[0],
+          destination: PLACES[2],
+          vehicle: "moto",
+          proposedPrice: 5000,
+        })
+        .expect(201)
+    ).body as Trip;
+    store.db
+      .prepare("UPDATE trips SET createdAt=? WHERE id=?")
+      .run(fixTime - 2000, created.id);
+
+    await dispatch.tick();
+    const recommendation = store.db
+      .prepare(
+        "SELECT etaSeconds,status FROM dispatch_recommendations WHERE tripId=? AND driverId=?",
+      )
+      .get(created.id, d.profile.id) as
+      | { etaSeconds: number; status: string }
+      | undefined;
+    expect(recommendation?.status).toBe("pending");
+    expect(recommendation?.etaSeconds).toBeGreaterThan(0);
+
+    const requests = (
+      await request(app).get("/api/requests").set(auth(d.token)).expect(200)
+    ).body as Trip[];
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatchObject({
+      id: created.id,
+      dispatchRecommendation: {
+        etaMinutes: Math.max(1, Math.ceil(recommendation!.etaSeconds / 60)),
+      },
+    });
   });
 });

@@ -24,6 +24,11 @@ export function openDatabase(path: string) {
     CREATE TABLE IF NOT EXISTS documents (id TEXT PRIMARY KEY, userId TEXT NOT NULL, kind TEXT NOT NULL, path TEXT NOT NULL, mime TEXT NOT NULL, createdAt INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS pin_attempts (tripId TEXT PRIMARY KEY, attempts INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS driver_profiles (userId TEXT PRIMARY KEY REFERENCES users(id), data TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS driver_positions (userId TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, city TEXT NOT NULL, vehicle TEXT NOT NULL, cell TEXT NOT NULL, latitude REAL NOT NULL, longitude REAL NOT NULL, accuracy REAL NOT NULL, capturedAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL);
+    CREATE INDEX IF NOT EXISTS driver_positions_cell_fresh ON driver_positions(city,vehicle,cell,capturedAt DESC);
+    CREATE TABLE IF NOT EXISTS dispatch_recommendations (tripId TEXT NOT NULL REFERENCES trips(id) ON DELETE CASCADE, driverId TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, etaSeconds INTEGER NOT NULL, status TEXT NOT NULL CHECK(status IN ('pending','offered','expired','cancelled')), createdAt INTEGER NOT NULL, expiresAt INTEGER NOT NULL, PRIMARY KEY(tripId,driverId));
+    CREATE UNIQUE INDEX IF NOT EXISTS dispatch_one_pending_per_driver ON dispatch_recommendations(driverId) WHERE status='pending';
+    CREATE INDEX IF NOT EXISTS dispatch_pending_trip ON dispatch_recommendations(tripId,status,expiresAt);
     CREATE TABLE IF NOT EXISTS rider_profiles (userId TEXT PRIMARY KEY REFERENCES users(id), data TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS saved_places (userId TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, id TEXT NOT NULL, category TEXT NOT NULL, label TEXT NOT NULL, note TEXT, placeData TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, PRIMARY KEY(userId,id));
     CREATE INDEX IF NOT EXISTS saved_places_user_updated ON saved_places(userId, updatedAt DESC);

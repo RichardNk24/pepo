@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pepo
+      POSTGRES_USER: pepo
+      POSTGRES_PASSWORD: ${PEPO_POSTGRES_PASSWORD:-pepo_local_dev}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pepo-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pepo -d pepo"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${PEPO_REDIS_PASSWORD:-pepo_local_dev}"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - pepo-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${PEPO_REDIS_PASSWORD:-pepo_local_dev}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pepo-postgres:
+  pepo-redis:

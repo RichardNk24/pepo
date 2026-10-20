@@ -33,6 +33,12 @@ export function IncomingRideRequest({ trip }: { trip: Trip }) {
         destination={trip.destination}
         stops={trip.stops}
       />
+      {trip.dispatchRecommendation && (
+        <Tag tone="green">
+          {app.t("dispatchRecommendation")} ~
+          {trip.dispatchRecommendation.etaMinutes} {app.t("minutes")}
+        </Tag>
+      )}
       <View style={s.rowBetween}>
         <Txt variant="small" color={C.muted}>
           {trip.route.distanceKm} km · {trip.route.durationMin} min

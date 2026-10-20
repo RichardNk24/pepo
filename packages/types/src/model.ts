@@ -167,6 +167,7 @@ export type Trip = {
   stops?: Place[];
   scheduledAt?: number;
   dispatchStartedAt?: number;
+  dispatchRecommendation?: { etaMinutes: number; expiresAt: number };
   cancellationReason?: string;
   guest?: { name: string; phone?: string };
   id: string;
