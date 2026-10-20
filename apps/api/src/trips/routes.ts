@@ -33,6 +33,34 @@ export function register_trips(ctx: RouteContext) {
     participant,
     requireDriver,
   } = ctx;
+  const requireTripRole = (t: Trip, actor: Parameters<typeof participant>[1]) => {
+    if (!((actor.role === "passenger" && actor.id === t.riderId) ||
+      (actor.role === "driver" && actor.id === t.driverId)))
+      throw new ApiError(403, "Cette course ne vous appartient pas dans ce rôle.");
+  };
+  app.get("/api/trips/:id/receipt", wrap((req, res) => {
+    const t = requiredTrip(String(req.params.id));
+    requireTripRole(t, req.actor);
+    if (t.status !== "completed") throw new ApiError(409, "La course n’est pas terminée.");
+    res.json(visibleTrip(t, req.actor));
+  }));
+  app.post("/api/trips/:id/cash-collected", wrap((req, res) => {
+    const t = store.atomic(() => {
+      const t = requiredTrip(String(req.params.id));
+      if (req.actor.role !== "driver" || req.actor.id !== t.driverId)
+        throw new ApiError(403, "Seul le chauffeur de cette course peut confirmer la réception.");
+      if (t.status !== "completed" || t.payment !== "cash")
+        throw new ApiError(409, "Terminez la course avant de confirmer les espèces reçues.");
+      if (!t.cashCollectedAt) {
+        t.cashCollectedAt = Date.now();
+        t.updatedAt = Date.now();
+        store.saveTrip(t);
+      }
+      return t;
+    });
+    notify(t);
+    res.json(visibleTrip(t, req.actor));
+  }));
   app.get(
     "/api/trips",
     wrap((req, res) => {
@@ -340,6 +368,9 @@ export function register_trips(ctx: RouteContext) {
       const { offerId } = z.object({ offerId: z.string() }).parse(req.body);
       const t = store.atomic(() => {
         const t = requiredTrip(String(req.params.id));
+        if (req.actor.role !== "passenger" || req.actor.id !== t.riderId)
+          throw new ApiError(403, "Seul le passager peut choisir cette offre.");
+        if (t.status === "accepted" && t.offers.some(o => o.id === offerId && o.status === "accepted")) return t;
         participant(t, req.actor);
         assertTransition(t, "accepted", req.actor);
         const o = t.offers.find((o) => o.id === offerId);
@@ -350,6 +381,8 @@ export function register_trips(ctx: RouteContext) {
           !driver ||
           !driver.online ||
           !canDrive(driver) ||
+          driver.city !== t.pickup.city ||
+          driver.driver?.vehicle !== t.vehicle ||
           store.activeFor(driver.id).length
         )
           throw new ApiError(409, "Ce conducteur n’est plus disponible.");
@@ -380,6 +413,13 @@ export function register_trips(ctx: RouteContext) {
           pin: z.string().optional(),
         })
         .parse(req.body);
+      const currentState = requiredTrip(String(req.params.id));
+      requireTripRole(currentState, req.actor);
+      if (input.status !== "cancelled" && req.actor.role !== "driver")
+        throw new ApiError(403, "Seul le chauffeur peut effectuer cette action.");
+      // An authenticated retry returns the current result without repeating side effects.
+      if (currentState.status === input.status)
+        return res.json(visibleTrip(currentState, req.actor));
       if (input.status === "in_progress") {
         const current = requiredTrip(String(req.params.id));
         if (
@@ -418,6 +458,8 @@ export function register_trips(ctx: RouteContext) {
           safety.requirePickup(t);
         }
         t.status = input.status;
+        if (input.status === "arrived") t.arrivedAt = Date.now();
+        if (input.status === "cancelled") t.cancelledAt = Date.now();
         if (input.status === "in_progress") t.startedAt = Date.now();
         t.updatedAt = Date.now();
         if (["completed", "cancelled"].includes(input.status)) safety.finish(t);
@@ -449,7 +491,7 @@ export function register_trips(ctx: RouteContext) {
         .parse(req.body);
       const t = store.atomic(() => {
         const t = requiredTrip(String(req.params.id));
-        if (req.actor.id !== t.riderId || t.status !== "completed" || t.rating)
+        if (req.actor.role !== "passenger" || req.actor.id !== t.riderId || t.status !== "completed" || t.rating)
           throw new ApiError(409, "Vous ne pouvez pas noter cette course.");
         t.rating = rating;
         store.saveTrip(t);

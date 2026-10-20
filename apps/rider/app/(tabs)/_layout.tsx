@@ -1,9 +1,11 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { C } from "@pepo/config/tokens";
 import { useApp } from "@pepo/session/AppProvider";
 import { Redirect, Tabs } from "expo-router";
 import { Clock3, Compass, ShieldCheck, UserRound } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function TabsLayout() {
+  const C = useThemeColors();
   const { ready, profile, t } = useApp();
   const insets = useSafeAreaInsets();
   if (!ready) return null;

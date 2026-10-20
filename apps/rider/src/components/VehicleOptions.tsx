@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import * as Haptics from "expo-haptics";
 import { Clock3, DollarSign, Users } from "lucide-react-native";
 import { useContext, useEffect, useState } from "react";
@@ -36,6 +37,7 @@ export function VehicleOptions({
   /** Live pickup estimates from dispatch, keyed by vehicle type. */
   pickupEtaMinutes?: Partial<Record<ActiveVehicleKind, number>>;
 }) {
+  const C = useThemeColors();
   const [sort, setSort] = useState<SortMode>("recommended");
   const sheetScroll = useContext(SnapSheetScrollContext);
   const [sectionY, setSectionY] = useState(0);
@@ -479,6 +481,7 @@ function SortButton({
   width: number;
   onPress: () => void;
 }) {
+  const C = useThemeColors();
   return (
     <Pressable
       accessibilityRole="radio"

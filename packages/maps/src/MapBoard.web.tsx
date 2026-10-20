@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { GOOGLE_MAP_URL, GOOGLE_WEB_KEY } from "@pepo/api-client/maps";
 import { C } from "@pepo/config/tokens";
 import { useI18n } from "@pepo/i18n/Context";
@@ -20,11 +21,12 @@ export default function MapBoard(props: MapProps) {
     ...props,
     labels: { pickup: t("departLabel"), destination: t("arriveLabel") },
   };
+  const palette = useThemeColors();
   const motionEnabled = useMapMotion();
   const ref = useRef<HTMLIFrameElement>(null),
     latest = useRef(props),
     readyRef = useRef(false);
-  latest.current = { ...props, motionEnabled };
+  latest.current = { ...props, motionEnabled, mapTheme: palette.themeName as MapProps["mapTheme"] };
   const [error, setError] = useState(""),
     [revision, setRevision] = useState(0),
     [ready, setReady] = useState(false);
@@ -102,7 +104,7 @@ export default function MapBoard(props: MapProps) {
   }, [revision]);
   useEffect(() => {
     if (ready) update();
-  }, [props, ready, motionEnabled]);
+  }, [props, ready, motionEnabled, palette]);
   if (!html && !GOOGLE_MAP_URL) return <DemoMap {...props} />;
   return (
     <View style={[StyleSheet.absoluteFill, { bottom: props.bottomInset || 0 }]}>

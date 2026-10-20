@@ -1,3 +1,5 @@
+import { useThemeColors } from "@pepo/ui/Theme";
+import { TripReceipt } from "@pepo/ui/TripReceipt";
 import { C } from "@pepo/config/tokens";
 import { safetyText } from "@pepo/i18n/safety";
 import { formatDate } from "@pepo/i18n/locale";
@@ -89,6 +91,8 @@ function fromParam(
   }
 }
 export default function Ride() {
+  const C = useThemeColors();
+  const r = makeStyles(C);
   const mapInsets = useSafeAreaInsets();
   const app = useApp(),
     router = useRouter(),
@@ -735,6 +739,11 @@ export default function Ride() {
                 </View>
                 <Tag icon={Banknote}>{app.t("cash")}</Tag>
               </View>
+              <TripReceipt
+                trip={trip}
+                language={app.settings.language}
+                demo={app.demo}
+              />
               {trip.status === "completed" && !trip.rating && (
                 <View style={{ marginTop: 25, gap: 16 }}>
                   <Txt variant="h3" style={{ textAlign: "center" }}>
@@ -1033,7 +1042,7 @@ export default function Ride() {
                 icon={CalendarClock}
                 label="Programmer la course"
                 style={{
-                  backgroundColor: scheduledAt ? C.yellow : C.yellowSoft,
+                  backgroundColor: C.yellowSoft,
                 }}
                 onPress={() => setScheduleOpen(true)}
               />
@@ -1397,93 +1406,94 @@ export default function Ride() {
     </SafeAreaView>
   );
 }
-const r = StyleSheet.create({
-  map: {
-    minHeight: 175,
-    position: "relative",
-    overflow: "hidden",
-    backgroundColor: "#E5E9EC",
-  },
-  mapHeader: {
-    position: "absolute",
-    top: 15,
-    left: 20,
-    right: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  routePill: {
-    position: "absolute",
-    bottom: 48,
-    alignSelf: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: C.paper,
-    borderRadius: 25,
-    flexDirection: "row",
-    gap: 7,
-    alignItems: "center",
-  },
-  sheet: {
-    flex: 0.57,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    backgroundColor: C.paper,
-    marginTop: -17,
-  },
-  handle: {
-    width: 35,
-    height: 4,
-    borderRadius: 4,
-    backgroundColor: "#D9DDD2",
-    alignSelf: "center",
-    marginTop: 11,
-    marginBottom: 22,
-  },
-  vehicle: {
-    flex: 1,
-    borderRadius: 19,
-    alignItems: "center",
-    paddingVertical: 14,
-    borderWidth: 1,
-  },
-  pinCard: {
-    marginTop: 18,
-    padding: 16,
-    borderRadius: 19,
-    backgroundColor: C.greenSoft,
-  },
-  pinCell: {
-    width: 44,
-    height: 49,
-    borderRadius: 11,
-    backgroundColor: C.paper,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchCircle: {
-    width: 83,
-    height: 83,
-    backgroundColor: C.yellowSoft,
-    borderRadius: 42,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scrim: {
-    flex: 1,
-    backgroundColor: "#17211177",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  counter: {
-    width: "100%",
-    maxWidth: 460,
-    padding: 25,
-    paddingBottom: 40,
-    borderTopLeftRadius: 27,
-    borderTopRightRadius: 27,
-    backgroundColor: C.paper,
-    gap: 15,
-  },
-});
+const makeStyles = (C: ReturnType<typeof useThemeColors>) =>
+  StyleSheet.create({
+    map: {
+      minHeight: 175,
+      position: "relative",
+      overflow: "hidden",
+      backgroundColor: "#E5E9EC",
+    },
+    mapHeader: {
+      position: "absolute",
+      top: 15,
+      left: 20,
+      right: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    routePill: {
+      position: "absolute",
+      bottom: 48,
+      alignSelf: "center",
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      backgroundColor: C.paper,
+      borderRadius: 25,
+      flexDirection: "row",
+      gap: 7,
+      alignItems: "center",
+    },
+    sheet: {
+      flex: 0.57,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      backgroundColor: C.paper,
+      marginTop: -17,
+    },
+    handle: {
+      width: 35,
+      height: 4,
+      borderRadius: 4,
+      backgroundColor: "#D9DDD2",
+      alignSelf: "center",
+      marginTop: 11,
+      marginBottom: 22,
+    },
+    vehicle: {
+      flex: 1,
+      borderRadius: 19,
+      alignItems: "center",
+      paddingVertical: 14,
+      borderWidth: 1,
+    },
+    pinCard: {
+      marginTop: 18,
+      padding: 16,
+      borderRadius: 19,
+      backgroundColor: C.greenSoft,
+    },
+    pinCell: {
+      width: 44,
+      height: 49,
+      borderRadius: 11,
+      backgroundColor: C.paper,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    searchCircle: {
+      width: 83,
+      height: 83,
+      backgroundColor: C.yellowSoft,
+      borderRadius: 42,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    scrim: {
+      flex: 1,
+      backgroundColor: "#17211177",
+      justifyContent: "flex-end",
+      alignItems: "center",
+    },
+    counter: {
+      width: "100%",
+      maxWidth: 460,
+      padding: 25,
+      paddingBottom: 40,
+      borderTopLeftRadius: 27,
+      borderTopRightRadius: 27,
+      backgroundColor: C.paper,
+      gap: 15,
+    },
+  });

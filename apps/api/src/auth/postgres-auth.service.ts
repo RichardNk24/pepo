@@ -9,7 +9,7 @@ import type { ServerConfig } from "../runtime";
 import { hash, id } from "../runtime";
 import type { Store } from "../database";
 import { PostgresService } from "../nest/infrastructure/postgres.service";
-import { AUTH_CONFIG, AUTH_LEGACY_STORE } from "./postgres-auth.module";
+import { AUTH_CONFIG, AUTH_LEGACY_STORE } from "./postgres-auth.tokens";
 
 type AuthRole = "passenger" | "driver";
 type AuthInput = {
@@ -23,7 +23,7 @@ type AuthInput = {
 @Injectable()
 export class PostgresAuthService {
   constructor(
-    private readonly postgres: PostgresService,
+    @Inject(PostgresService) private readonly postgres: PostgresService,
     @Inject(AUTH_LEGACY_STORE) private readonly store: Store,
     @Inject(AUTH_CONFIG) private readonly config: ServerConfig,
   ) {}

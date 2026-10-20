@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { C } from "@pepo/config/tokens";
 import type { CityId } from "@pepo/types/model";
 import { Button, IconButton, s, Txt } from "@pepo/ui/UI";
@@ -23,6 +24,8 @@ export function SchedulePicker({
   onClose: () => void;
   onChange: (value?: number) => void;
 }) {
+ const C=useThemeColors();
+
   const [day, setDay] = useState(0),
     [selected, setSelected] = useState<number>(),
     [now, setNow] = useState(Date.now());
@@ -89,7 +92,7 @@ export function SchedulePicker({
                     backgroundColor: day === d ? C.yellow : C.background,
                   }}
                 >
-                  <Txt variant="label">
+                  <Txt variant="label" color={day === d ? C.onAccent : C.ink}>
                     {d === 0
                       ? "Aujourd’hui"
                       : d === 1

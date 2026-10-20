@@ -4,8 +4,8 @@ import type { Store } from "../database";
 import { PostgresAuthController } from "./postgres-auth.controller";
 import { PostgresAuthService } from "./postgres-auth.service";
 
-export const AUTH_CONFIG = Symbol("PEPO_AUTH_CONFIG");
-export const AUTH_LEGACY_STORE = Symbol("PEPO_AUTH_LEGACY_STORE");
+import { AUTH_CONFIG, AUTH_LEGACY_STORE } from "./postgres-auth.tokens";
+export { AUTH_CONFIG, AUTH_LEGACY_STORE } from "./postgres-auth.tokens";
 
 @Module({})
 export class PostgresAuthModule {

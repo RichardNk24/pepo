@@ -1,3 +1,4 @@
+import { premiumCopy } from "./premium";
 import { translateSafetyCopy } from "./safety";
 import type { Language } from "@pepo/types/model";
 import { catalogs } from "./catalog";
@@ -5,6 +6,7 @@ export const copyTranslations: Record<
   string,
   readonly [string, string, string]
 > = {
+  ...premiumCopy,
   "Ma position": ["My location", "Eneo langu", "Esika nazali"],
   "Votre offre": ["Your offer", "Bei yako", "Ntalo na yo"],
   "Votre offre · à confirmer": [

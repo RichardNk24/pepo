@@ -7,7 +7,9 @@
     "./PepoLogo": "./src/PepoLogo.tsx",
     "./UI": "./src/UI.tsx",
     "./BrandSplash": "./src/BrandSplash.tsx",
-    "./TripSafety": "./src/TripSafety.tsx"
+    "./TripSafety": "./src/TripSafety.tsx",
+    "./TripReceipt": "./src/TripReceipt.tsx",
+    "./Theme": "./src/Theme.tsx"
   },
   "dependencies": {
     "@pepo/config": "1.2.0",

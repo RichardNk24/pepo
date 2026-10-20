@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { C } from "@pepo/config/tokens";
 import { useApp } from "@pepo/session/AppProvider";
 import { Button, Header, Screen, Txt, s } from "@pepo/ui/UI";
@@ -17,6 +18,9 @@ import { ContactEditor } from "./ContactEditor";
 export default function SafetyScreen({
   back = false,
 }: { back?: boolean } = {}) {
+ const C=useThemeColors();
+ const safety=makeStyles(C);
+
   const app = useApp(),
     router = useRouter();
   const [contact, setContact] = useState(false);
@@ -46,7 +50,7 @@ export default function SafetyScreen({
       >
         <View style={safety.hero}>
           <View style={safety.symbol}>
-            <ShieldCheck size={42} color={C.green} strokeWidth={1.5} />
+            <ShieldCheck size={42} color={C.accentDark} strokeWidth={1.5} />
           </View>
           <Txt
             variant="h1"
@@ -54,7 +58,7 @@ export default function SafetyScreen({
           >
             {app.t("safetyTitle")}
           </Txt>
-          <Txt color={C.green} style={{ marginTop: 11 }}>
+          <Txt color={C.accentDark} style={{ marginTop: 11 }}>
             {app.t("safetyDescription")}
           </Txt>
         </View>
@@ -139,13 +143,13 @@ export default function SafetyScreen({
     </Screen>
   );
 }
-const safety = StyleSheet.create({
-  hero: { padding: 25, backgroundColor: C.greenSoft, borderRadius: 26 },
+const makeStyles = (C: ReturnType<typeof useThemeColors>) => StyleSheet.create({
+  hero: { padding: 25, backgroundColor: C.accentSoft, borderRadius: 26 },
   symbol: {
     width: 76,
     height: 76,
     borderRadius: 26,
-    backgroundColor: "#DCEBDB",
+    backgroundColor: C.accentSoft,
     alignItems: "center",
     justifyContent: "center",
   },

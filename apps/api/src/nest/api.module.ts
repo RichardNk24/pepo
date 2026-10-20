@@ -1,9 +1,12 @@
+import { PremiumModule } from "../premium/premium.module";
 import { Controller, DynamicModule, Get, Inject, Module } from "@nestjs/common";
 import type { ServerConfig } from "../runtime";
 import type { Store } from "../database";
 import { PostgresAuthModule } from "../auth/postgres-auth.module";
 import { InfrastructureModule } from "./infrastructure/infrastructure.module";
 import { InfrastructureHealthController } from "./infrastructure/health.controller";
+
+import { TripPersistenceModule } from "../trips/persistence/trip-persistence.module";
 
 const API_CONFIG = Symbol("PEPO_API_CONFIG");
 
@@ -27,11 +30,19 @@ class HealthController {
 export class ApiModule {
   static register(config: ServerConfig, store?: Store): DynamicModule {
     if (config.authPostgresEnabled && !store)
-      throw new Error("Le store SQLite de compatibilité est requis pour le cutover Auth.");
+      throw new Error(
+        "Le store SQLite de compatibilité est requis pour le cutover Auth.",
+      );
+    if (process.env.TRIPS_POSTGRES_MIRROR_ENABLED === "true" && !store)
+      throw new Error("Le miroir des courses nécessite le store SQLite.");
     return {
       module: ApiModule,
       imports: [
         InfrastructureModule,
+        ...(store ? [PremiumModule.register(store, config)] : []),
+        ...(process.env.TRIPS_POSTGRES_MIRROR_ENABLED === "true" && store
+          ? [TripPersistenceModule.register(store)]
+          : []),
         ...(config.authPostgresEnabled && store
           ? [PostgresAuthModule.register(config, store)]
           : []),

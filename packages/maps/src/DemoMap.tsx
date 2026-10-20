@@ -1,3 +1,4 @@
+import { useThemeColors } from "@pepo/ui/Theme";
 import { C } from "@pepo/config/tokens";
 import { Txt } from "@pepo/ui/UI";
 import { useState } from "react";
@@ -17,6 +18,7 @@ export function DemoMap({
   bottomInset = 0,
   routeLabels = false,
 }: MapProps) {
+ const C=useThemeColors();
   const [size, setSize] = useState({ width: 410, height: 620 });
   const scale = 410 / Math.max(1, size.width);
   const canvasHeight = size.height * scale;
